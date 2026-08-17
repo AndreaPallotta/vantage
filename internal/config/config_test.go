@@ -13,13 +13,14 @@ func TestDefaultConfig(t *testing.T) {
 	if !cfg.AutoOpen {
 		t.Errorf("expected default AutoOpen to be true")
 	}
+	if len(cfg.Spaces) == 0 {
+		t.Errorf("expected at least 1 default space")
+	}
 }
 
 func TestLoadWithEnvOverrides(t *testing.T) {
-	os.Setenv("GITHUB_TOKEN", "test-token-12345")
-	os.Setenv("VANTAGE_SPACE", "TestUser")
+	os.Setenv("VANTAGE_SPACE", "github-andrea")
 	defer func() {
-		os.Unsetenv("GITHUB_TOKEN")
 		os.Unsetenv("VANTAGE_SPACE")
 	}()
 
@@ -28,10 +29,7 @@ func TestLoadWithEnvOverrides(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if cfg.Token != "test-token-12345" {
-		t.Errorf("expected token to be test-token-12345, got %s", cfg.Token)
-	}
-	if cfg.Space != "TestUser" {
-		t.Errorf("expected space to be TestUser, got %s", cfg.Space)
+	if cfg.ActiveSpace != "github-andrea" {
+		t.Errorf("expected active space to be github-andrea, got %s", cfg.ActiveSpace)
 	}
 }

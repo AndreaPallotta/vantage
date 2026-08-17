@@ -5,19 +5,20 @@ import (
 	"fmt"
 
 	"github.com/AndreaPallotta/vantage/internal/config"
-	"github.com/AndreaPallotta/vantage/internal/github"
+	"github.com/AndreaPallotta/vantage/internal/manager"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
 var (
-	flagTriggerRef string
+	flagTriggerRef   string
+	flagTriggerSpace string
 )
 
 var triggerCmd = &cobra.Command{
-	Use:   "trigger <repo> <workflow>",
-	Short: "Dispatch a GitHub Actions workflow run for a repository",
-	Args:  cobra.ExactArgs(2),
+	Use:   "trigger <repo> [workflow]",
+	Short: "Dispatch a pipeline or workflow run for a project",
+	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg, err := config.Load()
 		if err != nil {
@@ -25,12 +26,24 @@ var triggerCmd = &cobra.Command{
 		}
 
 		repo := args[0]
-		workflow := args[1]
+		workflow := "release.yml"
+		if len(args) > 1 {
+			workflow = args[1]
+		}
 
-		client := github.NewClient(cfg.Token)
-		owner := cfg.Space
-		if owner == "" {
-			owner = "AndreaPallotta"
+		spaceID := flagTriggerSpace
+		if spaceID == "" {
+			if flagSpace != "" && flagSpace != "all" {
+				spaceID = flagSpace
+			} else if len(cfg.Spaces) > 0 {
+				spaceID = cfg.Spaces[0].ID
+			}
+		}
+
+		mgr := manager.New(cfg)
+		prov, err := mgr.GetProvider(spaceID)
+		if err != nil {
+			return err
 		}
 
 		ref := flagTriggerRef
@@ -38,23 +51,25 @@ var triggerCmd = &cobra.Command{
 			ref = "main"
 		}
 
-		fmt.Printf("🚀 Dispatching workflow %s for %s/%s on ref %s...\n",
+		fmt.Printf("🚀 Triggering %s pipeline for %s on ref %s [%s: %s]...\n",
 			color.CyanString(workflow),
-			color.YellowString(owner),
 			color.YellowString(repo),
 			color.GreenString(ref),
+			prov.Platform(),
+			prov.Namespace(),
 		)
 
-		if err := client.DispatchWorkflow(context.Background(), owner, repo, workflow, ref, nil); err != nil {
-			return fmt.Errorf("failed to dispatch workflow: %w", err)
+		if err := prov.TriggerPipeline(context.Background(), repo, ref, nil); err != nil {
+			return fmt.Errorf("failed to trigger pipeline: %w", err)
 		}
 
-		color.Green("✓ Successfully dispatched workflow! Check status with: vantage runs %s\n", repo)
+		color.Green("✓ Successfully triggered pipeline! Check status with: vantage runs %s\n", repo)
 		return nil
 	},
 }
 
 func init() {
 	triggerCmd.Flags().StringVarP(&flagTriggerRef, "ref", "r", "main", "Git branch, tag, or SHA ref to run on")
+	triggerCmd.Flags().StringVarP(&flagTriggerSpace, "space", "s", "", "Space ID to target")
 	rootCmd.AddCommand(triggerCmd)
 }

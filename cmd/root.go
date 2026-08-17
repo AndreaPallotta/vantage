@@ -5,25 +5,25 @@ import (
 	"os"
 
 	"github.com/AndreaPallotta/vantage/internal/config"
-	"github.com/AndreaPallotta/vantage/internal/github"
+	"github.com/AndreaPallotta/vantage/internal/manager"
 	"github.com/AndreaPallotta/vantage/internal/server"
 	"github.com/spf13/cobra"
 )
 
 var (
-	flagPort     int
-	flagSpace    string
-	flagToken    string
-	flagNoOpen   bool
-	flagIncludeForks bool
+	flagPort            int
+	flagSpace           string
+	flagToken           string
+	flagNoOpen          bool
+	flagIncludeForks    bool
 	flagIncludeArchived bool
 )
 
 var rootCmd = &cobra.Command{
 	Use:   "vantage",
-	Short: "Centralized GitHub Multi-Repo & CI/CD Mission Control Dashboard",
-	Long: `Vantage is a high-ground mission control cockpit for monitoring repositories,
-commit vitality, release tags, and CI/CD pipelines across your entire GitHub space.`,
+	Short: "Centralized Multi-Platform (GitHub & GitLab) Mission Control Dashboard",
+	Long: `Vantage is a unified mission control cockpit for monitoring repositories,
+commit vitality, release tags, and CI/CD pipelines across all your GitHub and GitLab spaces.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg, err := config.Load()
 		if err != nil {
@@ -34,10 +34,7 @@ commit vitality, release tags, and CI/CD pipelines across your entire GitHub spa
 			cfg.Port = flagPort
 		}
 		if flagSpace != "" {
-			cfg.Space = flagSpace
-		}
-		if flagToken != "" {
-			cfg.Token = flagToken
+			cfg.ActiveSpace = flagSpace
 		}
 		if flagNoOpen {
 			cfg.AutoOpen = false
@@ -49,8 +46,8 @@ commit vitality, release tags, and CI/CD pipelines across your entire GitHub spa
 			cfg.IncludeArchived = true
 		}
 
-		client := github.NewClient(cfg.Token)
-		srv := server.New(cfg, client)
+		mgr := manager.New(cfg)
+		srv := server.New(cfg, mgr)
 
 		return srv.Start()
 	},
@@ -66,8 +63,7 @@ func Execute() {
 
 func init() {
 	rootCmd.PersistentFlags().IntVarP(&flagPort, "port", "p", 8080, "Port to run the dashboard web server on")
-	rootCmd.PersistentFlags().StringVarP(&flagSpace, "space", "s", "", "GitHub user or organization to monitor (default: AndreaPallotta)")
-	rootCmd.PersistentFlags().StringVarP(&flagToken, "token", "t", "", "GitHub Personal Access Token (defaults to GITHUB_TOKEN or gh auth token)")
+	rootCmd.PersistentFlags().StringVarP(&flagSpace, "space", "s", "all", "Space ID to monitor or 'all' for unified fleet")
 	rootCmd.PersistentFlags().BoolVar(&flagNoOpen, "no-open", false, "Do not automatically open browser on start")
 	rootCmd.PersistentFlags().BoolVar(&flagIncludeForks, "include-forks", false, "Include forked repositories in space overview")
 	rootCmd.PersistentFlags().BoolVar(&flagIncludeArchived, "include-archived", false, "Include archived repositories")

@@ -1,7 +1,6 @@
 package server
 
 import (
-	"context"
 	"embed"
 	"encoding/json"
 	"fmt"
@@ -12,7 +11,7 @@ import (
 	"time"
 
 	"github.com/AndreaPallotta/vantage/internal/config"
-	"github.com/AndreaPallotta/vantage/internal/github"
+	"github.com/AndreaPallotta/vantage/internal/manager"
 )
 
 //go:embed web/*
@@ -20,18 +19,18 @@ var webFS embed.FS
 
 // Server hosts the Vantage dashboard and API endpoints.
 type Server struct {
-	cfg    *config.Config
-	client *github.Client
-	mux    *http.ServeMux
-	server *http.Server
+	cfg     *config.Config
+	manager *manager.Manager
+	mux     *http.ServeMux
+	server  *http.Server
 }
 
 // New creates a new Vantage server instance.
-func New(cfg *config.Config, client *github.Client) *Server {
+func New(cfg *config.Config, mgr *manager.Manager) *Server {
 	s := &Server{
-		cfg:    cfg,
-		client: client,
-		mux:    http.NewServeMux(),
+		cfg:     cfg,
+		manager: mgr,
+		mux:     http.NewServeMux(),
 	}
 
 	s.routes()
@@ -46,13 +45,12 @@ func New(cfg *config.Config, client *github.Client) *Server {
 }
 
 func (s *Server) routes() {
-	// Serve embedded web frontend
 	subFS, err := fs.Sub(webFS, "web")
 	if err == nil {
 		s.mux.Handle("/", http.FileServer(http.FS(subFS)))
 	}
 
-	// API Endpoints
+	s.mux.HandleFunc("/api/spaces", s.handleListSpaces)
 	s.mux.HandleFunc("/api/space", s.handleSpaceOverview)
 	s.mux.HandleFunc("/api/actions/dispatch", s.handleDispatch)
 	s.mux.HandleFunc("/api/actions/rerun", s.handleRerun)
@@ -63,21 +61,19 @@ func (s *Server) routes() {
 	})
 }
 
+func (s *Server) handleListSpaces(w http.ResponseWriter, r *http.Request) {
+	spaces := s.manager.ListSpaces()
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(spaces)
+}
+
 func (s *Server) handleSpaceOverview(w http.ResponseWriter, r *http.Request) {
-	owner := r.URL.Query().Get("owner")
-	if owner == "" {
-		owner = s.cfg.Space
-	}
-	if owner == "" {
-		// Try to resolve current authenticated user
-		if user, err := s.client.GetAuthenticatedUser(r.Context()); err == nil && user.Login != "" {
-			owner = user.Login
-		} else {
-			owner = "AndreaPallotta"
-		}
+	spaceID := r.URL.Query().Get("id")
+	if spaceID == "" {
+		spaceID = s.cfg.ActiveSpace
 	}
 
-	overview, err := s.client.GetSpaceOverview(r.Context(), owner, s.cfg.IncludeForks, s.cfg.IncludeArchived)
+	overview, err := s.manager.GetOverview(r.Context(), spaceID, s.cfg.IncludeForks, s.cfg.IncludeArchived)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("failed to get space overview: %v", err), http.StatusInternalServerError)
 		return
@@ -94,7 +90,7 @@ func (s *Server) handleDispatch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req struct {
-		Owner    string                 `json:"owner"`
+		SpaceID  string                 `json:"space_id"`
 		Repo     string                 `json:"repo"`
 		Workflow string                 `json:"workflow"`
 		Ref      string                 `json:"ref"`
@@ -106,18 +102,23 @@ func (s *Server) handleDispatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.Owner == "" || req.Repo == "" || req.Workflow == "" {
-		http.Error(w, "owner, repo, and workflow are required", http.StatusBadRequest)
+	if req.SpaceID == "" && len(s.cfg.Spaces) > 0 {
+		req.SpaceID = s.cfg.Spaces[0].ID
+	}
+
+	prov, err := s.manager.GetProvider(req.SpaceID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if err := s.client.DispatchWorkflow(r.Context(), req.Owner, req.Repo, req.Workflow, req.Ref, req.Inputs); err != nil {
+	if err := prov.TriggerPipeline(r.Context(), req.Repo, req.Ref, req.Inputs); err != nil {
 		http.Error(w, fmt.Sprintf("dispatch error: %v", err), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(map[string]string{"message": "workflow dispatched successfully"})
+	_ = json.NewEncoder(w).Encode(map[string]string{"message": "pipeline triggered successfully"})
 }
 
 func (s *Server) handleRerun(w http.ResponseWriter, r *http.Request) {
@@ -127,9 +128,9 @@ func (s *Server) handleRerun(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req struct {
-		Owner string `json:"owner"`
-		Repo  string `json:"repo"`
-		RunID int64  `json:"run_id"`
+		SpaceID string `json:"space_id"`
+		Repo    string `json:"repo"`
+		RunID   int64  `json:"run_id"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -137,13 +138,23 @@ func (s *Server) handleRerun(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := s.client.RerunWorkflow(r.Context(), req.Owner, req.Repo, req.RunID); err != nil {
+	if req.SpaceID == "" && len(s.cfg.Spaces) > 0 {
+		req.SpaceID = s.cfg.Spaces[0].ID
+	}
+
+	prov, err := s.manager.GetProvider(req.SpaceID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := prov.RetryPipeline(r.Context(), req.Repo, req.RunID); err != nil {
 		http.Error(w, fmt.Sprintf("rerun error: %v", err), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(map[string]string{"message": "workflow rerun initiated"})
+	_ = json.NewEncoder(w).Encode(map[string]string{"message": "pipeline rerun initiated"})
 }
 
 func (s *Server) handleCancel(w http.ResponseWriter, r *http.Request) {
@@ -153,9 +164,9 @@ func (s *Server) handleCancel(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req struct {
-		Owner string `json:"owner"`
-		Repo  string `json:"repo"`
-		RunID int64  `json:"run_id"`
+		SpaceID string `json:"space_id"`
+		Repo    string `json:"repo"`
+		RunID   int64  `json:"run_id"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -163,16 +174,26 @@ func (s *Server) handleCancel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := s.client.CancelWorkflowRun(r.Context(), req.Owner, req.Repo, req.RunID); err != nil {
+	if req.SpaceID == "" && len(s.cfg.Spaces) > 0 {
+		req.SpaceID = s.cfg.Spaces[0].ID
+	}
+
+	prov, err := s.manager.GetProvider(req.SpaceID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := prov.CancelPipeline(r.Context(), req.Repo, req.RunID); err != nil {
 		http.Error(w, fmt.Sprintf("cancel error: %v", err), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(map[string]string{"message": "workflow run cancelled"})
+	_ = json.NewEncoder(w).Encode(map[string]string{"message": "pipeline cancelled"})
 }
 
-// Start runs the HTTP server and opens the browser if enabled.
+// Start runs the HTTP server.
 func (s *Server) Start() error {
 	url := fmt.Sprintf("http://localhost:%d", s.cfg.Port)
 	fmt.Printf("\n🚀 Vantage Mission Control running at: %s\n\n", url)
@@ -185,11 +206,6 @@ func (s *Server) Start() error {
 	}
 
 	return s.server.ListenAndServe()
-}
-
-// Shutdown gracefully stops the server.
-func (s *Server) Shutdown(ctx context.Context) error {
-	return s.server.Shutdown(ctx)
 }
 
 func openBrowser(url string) {

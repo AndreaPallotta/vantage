@@ -7,27 +7,40 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/AndreaPallotta/vantage/internal/models"
 )
 
 // Config represents Vantage configuration settings.
 type Config struct {
-	Token          string `json:"token,omitempty"`
-	Space          string `json:"space,omitempty"`
-	Port           int    `json:"port"`
-	AutoOpen       bool   `json:"auto_open"`
-	RefreshSec     int    `json:"refresh_sec"`
-	IncludeForks   bool   `json:"include_forks"`
-	IncludeArchived bool  `json:"include_archived"`
+	ActiveSpace     string               `json:"active_space"`
+	Port            int                  `json:"port"`
+	AutoOpen        bool                 `json:"auto_open"`
+	RefreshSec      int                  `json:"refresh_sec"`
+	IncludeForks    bool                 `json:"include_forks"`
+	IncludeArchived bool                 `json:"include_archived"`
+	Spaces          []models.SpaceConfig `json:"spaces"`
 }
 
-// DefaultConfig returns reasonable defaults for Vantage.
+// DefaultConfig returns defaults with the primary GitHub space configured.
 func DefaultConfig() *Config {
 	return &Config{
-		Port:           8080,
-		AutoOpen:       true,
-		RefreshSec:     30,
-		IncludeForks:   false,
-		IncludeArchived: false,
+		ActiveSpace:     "all",
+		Port:            8080,
+		AutoOpen:        true,
+		RefreshSec:      30,
+		IncludeForks:    false,
+		IncludeArchived:  false,
+		Spaces: []models.SpaceConfig{
+			{
+				ID:        "github-andrea",
+				Name:      "GitHub (AndreaPallotta)",
+				Platform:  models.PlatformGitHub,
+				BaseURL:   "https://api.github.com",
+				Namespace: "AndreaPallotta",
+				TokenEnv:  "GITHUB_TOKEN",
+			},
+		},
 	}
 }
 
@@ -51,22 +64,13 @@ func Load() (*Config, error) {
 		}
 	}
 
+	if len(cfg.Spaces) == 0 {
+		cfg.Spaces = DefaultConfig().Spaces
+	}
+
 	// Environment variable overrides
-	if envToken := os.Getenv("GITHUB_TOKEN"); envToken != "" {
-		cfg.Token = envToken
-	} else if envToken := os.Getenv("GH_TOKEN"); envToken != "" {
-		cfg.Token = envToken
-	}
-
 	if envSpace := os.Getenv("VANTAGE_SPACE"); envSpace != "" {
-		cfg.Space = envSpace
-	}
-
-	// Fallback to `gh auth token` if no token found
-	if cfg.Token == "" {
-		if token, err := getGhCliToken(); err == nil && token != "" {
-			cfg.Token = token
-		}
+		cfg.ActiveSpace = envSpace
 	}
 
 	return cfg, nil
@@ -89,6 +93,40 @@ func (c *Config) Save() error {
 	}
 
 	return os.WriteFile(path, data, 0600)
+}
+
+// ResolveToken determines the token for a specific space config.
+func ResolveToken(sc models.SpaceConfig) string {
+	if sc.Token != "" {
+		return sc.Token
+	}
+
+	if sc.TokenEnv != "" {
+		if val := os.Getenv(sc.TokenEnv); val != "" {
+			return val
+		}
+	}
+
+	if sc.Platform == models.PlatformGitHub {
+		if val := os.Getenv("GITHUB_TOKEN"); val != "" {
+			return val
+		}
+		if val := os.Getenv("GH_TOKEN"); val != "" {
+			return val
+		}
+		if tok, err := getGhCliToken(); err == nil && tok != "" {
+			return tok
+		}
+	} else if sc.Platform == models.PlatformGitLab {
+		if val := os.Getenv("GITLAB_TOKEN"); val != "" {
+			return val
+		}
+		if val := os.Getenv("GL_TOKEN"); val != "" {
+			return val
+		}
+	}
+
+	return ""
 }
 
 func getGhCliToken() (string, error) {
