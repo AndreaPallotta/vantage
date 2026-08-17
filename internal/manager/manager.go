@@ -130,9 +130,12 @@ func (m *Manager) GetOverview(ctx context.Context, spaceID string, includeForks,
 
 	wg.Wait()
 
-	for _, r := range allRuns {
-		if r.Conclusion == "success" {
-			successCount++
+	for _, r := range allRepos {
+		if len(r.WorkflowRuns) > 0 {
+			latest := r.WorkflowRuns[0]
+			if latest.Conclusion == "success" {
+				successCount++
+			}
 		}
 	}
 

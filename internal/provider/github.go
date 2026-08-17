@@ -426,14 +426,13 @@ func (p *GitHubProvider) GetOverview(ctx context.Context, includeForks, includeA
 
 	for _, r := range enrichedRepos {
 		totalStars += r.Stars
-		for _, run := range r.WorkflowRuns {
-			if run.Status == "in_progress" || run.Status == "queued" {
+		if len(r.WorkflowRuns) > 0 {
+			latestRun := r.WorkflowRuns[0]
+			if latestRun.Status == "in_progress" || latestRun.Status == "queued" {
 				activeCount++
-			}
-			if run.Conclusion == "failure" || run.Conclusion == "timed_out" {
+			} else if latestRun.Conclusion == "failure" || latestRun.Conclusion == "timed_out" || latestRun.Conclusion == "failed" {
 				failedCount++
-			}
-			if run.Conclusion == "success" {
+			} else if latestRun.Conclusion == "success" {
 				successCount++
 			}
 		}
