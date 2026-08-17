@@ -103,7 +103,6 @@ func (m *Manager) GetOverview(ctx context.Context, spaceID string, includeForks,
 	var allRepos []models.Repository
 	var allRuns []models.Run
 
-	totalStars := 0
 	activeCount := 0
 	failedCount := 0
 	successCount := 0
@@ -122,7 +121,6 @@ func (m *Manager) GetOverview(ctx context.Context, spaceID string, includeForks,
 
 			allRepos = append(allRepos, ov.Repositories...)
 			allRuns = append(allRuns, ov.RecentRuns...)
-			totalStars += ov.TotalStars
 			activeCount += ov.ActivePipelines
 			failedCount += ov.FailedPipelines
 		}(p)
@@ -153,7 +151,6 @@ func (m *Manager) GetOverview(ctx context.Context, spaceID string, includeForks,
 		ActivePipelines: activeCount,
 		FailedPipelines: failedCount,
 		SuccessRate:     successRate,
-		TotalStars:      totalStars,
 		LastRefreshed:   time.Now(),
 		Repositories:    allRepos,
 		RecentRuns:      allRuns,

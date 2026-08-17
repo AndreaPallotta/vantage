@@ -168,7 +168,6 @@ func (p *GitHubProvider) ListRepositories(ctx context.Context, includeForks, inc
 				Description:   r.Description,
 				HTMLURL:       r.HTMLURL,
 				Language:      r.Language,
-				Stars:         r.StargazersCount,
 				Forks:         r.ForksCount,
 				OpenIssues:    r.OpenIssuesCount,
 				DefaultBranch: r.DefaultBranch,
@@ -338,6 +337,83 @@ func (p *GitHubProvider) ListPipelines(ctx context.Context, repo string, limit i
 	return runs, nil
 }
 
+func (p *GitHubProvider) GetRunJobs(ctx context.Context, repo string, runID int64) ([]models.Job, error) {
+	owner := p.config.Namespace
+	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%d/jobs", owner, repo, runID)
+	req, err := p.newRequest(ctx, "GET", path, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	type rawStep struct {
+		Name        string    `json:"name"`
+		Status      string    `json:"status"`
+		Conclusion  string    `json:"conclusion"`
+		Number      int       `json:"number"`
+		StartedAt   time.Time `json:"started_at"`
+		CompletedAt time.Time `json:"completed_at"`
+	}
+
+	type rawJob struct {
+		ID          int64     `json:"id"`
+		RunID       int64     `json:"run_id"`
+		Name        string    `json:"name"`
+		Status      string    `json:"status"`
+		Conclusion  string    `json:"conclusion"`
+		StartedAt   time.Time `json:"started_at"`
+		CompletedAt time.Time `json:"completed_at"`
+		HTMLURL     string    `json:"html_url"`
+		Steps       []rawStep `json:"steps"`
+	}
+
+	type jobsResp struct {
+		Jobs []rawJob `json:"jobs"`
+	}
+
+	var resp jobsResp
+	if _, err := p.do(req, &resp); err != nil {
+		return nil, err
+	}
+
+	var jobs []models.Job
+	for _, j := range resp.Jobs {
+		var dur int64
+		if !j.StartedAt.IsZero() && !j.CompletedAt.IsZero() {
+			dur = int64(j.CompletedAt.Sub(j.StartedAt).Seconds())
+			if dur < 0 {
+				dur = 0
+			}
+		}
+
+		var steps []models.Step
+		for _, s := range j.Steps {
+			steps = append(steps, models.Step{
+				Number:      s.Number,
+				Name:        s.Name,
+				Status:      s.Status,
+				Conclusion:  s.Conclusion,
+				StartedAt:   s.StartedAt,
+				CompletedAt: s.CompletedAt,
+			})
+		}
+
+		jobs = append(jobs, models.Job{
+			ID:          j.ID,
+			RunID:       j.RunID,
+			Name:        j.Name,
+			Status:      j.Status,
+			Conclusion:  j.Conclusion,
+			DurationSec: dur,
+			StartedAt:   j.StartedAt,
+			CompletedAt: j.CompletedAt,
+			HTMLURL:     j.HTMLURL,
+			Steps:       steps,
+		})
+	}
+
+	return jobs, nil
+}
+
 func (p *GitHubProvider) TriggerPipeline(ctx context.Context, repo string, ref string, inputs map[string]interface{}) error {
 	if ref == "" {
 		ref = "main"
@@ -419,13 +495,11 @@ func (p *GitHubProvider) GetOverview(ctx context.Context, includeForks, includeA
 
 	wg.Wait()
 
-	totalStars := 0
 	activeCount := 0
 	failedCount := 0
 	successCount := 0
 
 	for _, r := range enrichedRepos {
-		totalStars += r.Stars
 		if len(r.WorkflowRuns) > 0 {
 			latestRun := r.WorkflowRuns[0]
 			if latestRun.Status == "in_progress" || latestRun.Status == "queued" {
@@ -452,7 +526,6 @@ func (p *GitHubProvider) GetOverview(ctx context.Context, includeForks, includeA
 		ActivePipelines: activeCount,
 		FailedPipelines: failedCount,
 		SuccessRate:     successRate,
-		TotalStars:      totalStars,
 		LastRefreshed:   time.Now(),
 		Repositories:    enrichedRepos,
 		RecentRuns:      allRuns,

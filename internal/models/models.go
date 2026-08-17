@@ -15,36 +15,35 @@ type SpaceConfig struct {
 	ID               string   `json:"id"`
 	Name             string   `json:"name"`
 	Platform         Platform `json:"platform"` // "github" | "gitlab"
-	BaseURL          string   `json:"base_url,omitempty"` // e.g. "https://gitlab.com/api/v4" or self-hosted
-	Namespace        string   `json:"namespace"` // owner, group, or user
+	BaseURL          string   `json:"base_url,omitempty"`
+	Namespace        string   `json:"namespace"`
 	Token            string   `json:"token,omitempty"`
-	TokenEnv         string   `json:"token_env,omitempty"` // e.g. "GITLAB_TOKEN"
+	TokenEnv         string   `json:"token_env,omitempty"`
 	IncludeSubgroups bool     `json:"include_subgroups,omitempty"`
 }
 
 // Repository represents a repository or project with enriched metadata.
 type Repository struct {
-	ID            string    `json:"id"`
-	Platform      Platform  `json:"platform"`
-	SpaceID       string    `json:"space_id"`
-	SpaceName     string    `json:"space_name"`
-	Name          string    `json:"name"`
-	FullName      string    `json:"full_name"`
-	Owner         string    `json:"owner"`
-	Description   string    `json:"description"`
-	HTMLURL       string    `json:"html_url"`
-	Language      string    `json:"language"`
-	Stars         int       `json:"stars"`
-	Forks         int       `json:"forks"`
-	OpenIssues    int       `json:"open_issues"`
-	DefaultBranch string    `json:"default_branch"`
-	IsPrivate     bool      `json:"is_private"`
-	IsArchived    bool      `json:"is_archived"`
-	UpdatedAt     time.Time `json:"updated_at"`
-	PushedAt      time.Time `json:"pushed_at"`
-	LatestCommit  *Commit   `json:"latest_commit,omitempty"`
-	LatestRelease *Release  `json:"latest_release,omitempty"`
-	WorkflowRuns  []Run     `json:"workflow_runs,omitempty"`
+	ID            string     `json:"id"`
+	Platform      Platform   `json:"platform"`
+	SpaceID       string     `json:"space_id"`
+	SpaceName     string     `json:"space_name"`
+	Name          string     `json:"name"`
+	FullName      string     `json:"full_name"`
+	Owner         string     `json:"owner"`
+	Description   string     `json:"description"`
+	HTMLURL       string     `json:"html_url"`
+	Language      string     `json:"language"`
+	Forks         int        `json:"forks"`
+	OpenIssues    int        `json:"open_issues"`
+	DefaultBranch string     `json:"default_branch"`
+	IsPrivate     bool       `json:"is_private"`
+	IsArchived    bool       `json:"is_archived"`
+	UpdatedAt     time.Time  `json:"updated_at"`
+	PushedAt      time.Time  `json:"pushed_at"`
+	LatestCommit  *Commit    `json:"latest_commit,omitempty"`
+	LatestRelease *Release   `json:"latest_release,omitempty"`
+	WorkflowRuns  []Run      `json:"workflow_runs,omitempty"`
 	Workflows     []Workflow `json:"workflows,omitempty"`
 }
 
@@ -100,6 +99,7 @@ type Run struct {
 	Actor        string    `json:"actor"`
 	ActorAvatar  string    `json:"actor_avatar"`
 	CommitMsg    string    `json:"commit_msg"`
+	JobsCount    int       `json:"jobs_count,omitempty"`
 }
 
 // Job represents a job inside a pipeline run.
@@ -107,25 +107,37 @@ type Job struct {
 	ID          int64     `json:"id"`
 	RunID       int64     `json:"run_id"`
 	Name        string    `json:"name"`
-	Status      string    `json:"status"`
-	Conclusion  string    `json:"conclusion"`
+	Stage       string    `json:"stage,omitempty"`
+	Status      string    `json:"status"`     // queued, in_progress, completed
+	Conclusion  string    `json:"conclusion"` // success, failure, cancelled
+	DurationSec int64     `json:"duration_sec"`
 	StartedAt   time.Time `json:"started_at"`
 	CompletedAt time.Time `json:"completed_at"`
+	Steps       []Step    `json:"steps"`
 	HTMLURL     string    `json:"html_url"`
+}
+
+// Step represents an individual step in a workflow job.
+type Step struct {
+	Number      int       `json:"number"`
+	Name        string    `json:"name"`
+	Status      string    `json:"status"`     // completed, in_progress, queued
+	Conclusion  string    `json:"conclusion"` // success, failure, skipped
+	StartedAt   time.Time `json:"started_at"`
+	CompletedAt time.Time `json:"completed_at"`
 }
 
 // SpaceOverview summarizes single or multi-space status.
 type SpaceOverview struct {
 	SpaceID         string       `json:"space_id"`
 	SpaceName       string       `json:"space_name"`
-	Platform        Platform     `json:"platform"` // "github", "gitlab", or "all"
+	Platform        Platform     `json:"platform"`
 	Owner           string       `json:"owner"`
 	OwnerAvatar     string       `json:"owner_avatar"`
 	TotalRepos      int          `json:"total_repos"`
 	ActivePipelines int          `json:"active_pipelines"`
 	FailedPipelines int          `json:"failed_pipelines"`
 	SuccessRate     float64      `json:"success_rate"`
-	TotalStars      int          `json:"total_stars"`
 	LastRefreshed   time.Time    `json:"last_refreshed"`
 	Repositories    []Repository `json:"repositories"`
 	RecentRuns      []Run        `json:"recent_runs"`
@@ -134,8 +146,8 @@ type SpaceOverview struct {
 
 // SpaceInfo represents basic metadata for space switcher dropdown.
 type SpaceInfo struct {
-	ID       string   `json:"id"`
-	Name     string   `json:"name"`
-	Platform Platform `json:"platform"`
-	Namespace string  `json:"namespace"`
+	ID        string   `json:"id"`
+	Name      string   `json:"name"`
+	Platform  Platform `json:"platform"`
+	Namespace string   `json:"namespace"`
 }

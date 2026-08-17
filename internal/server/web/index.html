@@ -27,7 +27,6 @@
       --danger-glow: rgba(239, 68, 68, 0.2);
       --info: #818cf8;
       --gitlab: #fc6d26;
-      --gitlab-glow: rgba(252, 109, 38, 0.25);
       --github: #6366f1;
       --radius-sm: 6px;
       --radius-md: 10px;
@@ -166,10 +165,10 @@
       flex: 1;
     }
 
-    /* Metric Cards Grid */
+    /* Metric Cards Grid - Interactive click filters */
     .metrics-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(4, 1fr);
       gap: 16px;
       margin-bottom: 24px;
     }
@@ -181,15 +180,28 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      transition: transform 0.15s ease;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
     }
-    .metric-card:hover { transform: translateY(-2px); }
+    .metric-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(56, 189, 248, 0.4);
+      background: var(--bg-card-hover);
+    }
+    .metric-card.active-filter {
+      border-color: var(--accent);
+      box-shadow: 0 0 16px var(--accent-glow);
+    }
     .metric-label {
       font-size: 12px;
       color: var(--text-secondary);
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
     .metric-value {
       font-size: 28px;
@@ -233,14 +245,15 @@
       align-items: center;
       gap: 10px;
     }
-    .platform-filter {
+    .status-filter-pills {
       display: flex;
       background: var(--bg-card);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-sm);
       padding: 2px;
+      gap: 2px;
     }
-    .platform-filter button {
+    .status-filter-pills button {
       background: none;
       border: none;
       color: var(--text-secondary);
@@ -251,7 +264,7 @@
       cursor: pointer;
       text-transform: uppercase;
     }
-    .platform-filter button.active {
+    .status-filter-pills button.active {
       background: rgba(56, 189, 248, 0.18);
       color: var(--accent);
     }
@@ -263,7 +276,7 @@
       border-radius: var(--radius-sm);
       font-size: 13px;
       font-family: inherit;
-      width: 240px;
+      width: 220px;
       outline: none;
     }
     .search-input:focus { border-color: var(--accent); }
@@ -375,11 +388,6 @@
       font-weight: 500;
     }
 
-    .repo-runs-bar {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
     .run-pill {
       font-size: 11px;
       font-weight: 600;
@@ -388,6 +396,7 @@
       display: inline-flex;
       align-items: center;
       gap: 4px;
+      cursor: pointer;
     }
     .run-pill.success { background: rgba(34, 197, 94, 0.15); color: #86efac; }
     .run-pill.failure { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
@@ -430,8 +439,8 @@
       flex: 1;
     }
     .pipeline-status-icon {
-      width: 28px;
-      height: 28px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -449,12 +458,12 @@
       50% { opacity: 0.5; }
     }
 
-    /* Modal Overlay */
+    /* Step Inspector Drawer / Modal */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(4px);
+      backdrop-filter: blur(6px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -472,14 +481,86 @@
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
       width: 90%;
-      max-width: 600px;
-      padding: 24px;
+      max-width: 680px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-body {
+      padding: 20px 24px;
+      overflow-y: auto;
+      flex: 1;
       display: flex;
       flex-direction: column;
       gap: 16px;
     }
-    .modal-title { font-size: 18px; font-weight: 700; }
+    .modal-footer {
+      padding: 14px 24px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* Step List Tree */
+    .job-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+    .job-header {
+      padding: 10px 14px;
+      background: rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .steps-list {
+      display: flex;
+      flex-direction: column;
+    }
+    .step-item {
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      border-top: 1px solid rgba(255,255,255,0.04);
+    }
+    .step-item:nth-child(even) {
+      background: rgba(255,255,255,0.02);
+    }
+    .step-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .step-icon {
+      font-size: 12px;
+      width: 16px;
+      height: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .step-icon.success { color: var(--success); }
+    .step-icon.failure { color: var(--danger); }
+    .step-icon.in_progress { color: var(--warning); animation: pulse 1s infinite; }
+    .step-icon.queued { color: var(--text-muted); }
+
     .form-group {
       display: flex;
       flex-direction: column;
@@ -545,43 +626,62 @@
   </header>
 
   <main>
-    <!-- Metric Overview -->
+    <!-- Interactive Metric Cards Grid -->
     <div class="metrics-grid">
-      <div class="metric-card">
-        <span class="metric-label">Repositories / Projects</span>
+      <div class="metric-card" onclick="filterByMetric('all')" title="Click to view all projects" id="cardAll">
+        <div class="metric-label">
+          <span>Projects</span>
+          <span style="font-size: 10px; color: var(--text-muted);">ALL</span>
+        </div>
         <span class="metric-value accent" id="metricRepos">--</span>
       </div>
-      <div class="metric-card">
-        <span class="metric-label">Active Pipelines</span>
+
+      <div class="metric-card" onclick="filterByMetric('active')" title="Click to view active pipelines" id="cardActive">
+        <div class="metric-label">
+          <span>Active Pipelines</span>
+          <span style="font-size: 10px; color: var(--warning);">LIVE</span>
+        </div>
         <span class="metric-value" id="metricActive">--</span>
       </div>
-      <div class="metric-card">
-        <span class="metric-label">Failed Pipelines</span>
+
+      <div class="metric-card" onclick="filterByMetric('failed')" title="Click to view failed pipelines" id="cardFailed">
+        <div class="metric-label">
+          <span>Failed (Latest)</span>
+          <span style="font-size: 10px; color: var(--danger);">NEEDS ATTENTION</span>
+        </div>
         <span class="metric-value danger" id="metricFailed">--</span>
       </div>
-      <div class="metric-card">
-        <span class="metric-label">Fleet Success Rate</span>
+
+      <div class="metric-card" onclick="filterByMetric('all')" title="Click to view fleet health" id="cardSuccess">
+        <div class="metric-label">
+          <span>Fleet Health Rate</span>
+          <span style="font-size: 10px; color: var(--success);">LATEST RUNS</span>
+        </div>
         <span class="metric-value success" id="metricSuccessRate">--%</span>
-      </div>
-      <div class="metric-card">
-        <span class="metric-label">Total Stars</span>
-        <span class="metric-value" id="metricStars">--</span>
       </div>
     </div>
 
     <!-- Tabs & Filter Bar -->
     <div class="tabs-bar">
       <div class="tabs">
-        <button class="tab-btn active" onclick="setTab('repos')">Repositories (<span id="tabRepoCount">0</span>)</button>
-        <button class="tab-btn" onclick="setTab('pipelines')">Live Pipelines Feed (<span id="tabRunsCount">0</span>)</button>
+        <button class="tab-btn active" id="tabBtnRepos" onclick="setTab('repos')">Repositories (<span id="tabRepoCount">0</span>)</button>
+        <button class="tab-btn" id="tabBtnPipelines" onclick="setTab('pipelines')">Live Pipelines Feed (<span id="tabRunsCount">0</span>)</button>
       </div>
 
       <div class="filter-bar">
-        <div class="platform-filter">
+        <div class="status-filter-pills" id="pipelineStatusFilters" style="display: none;">
+          <button class="active" onclick="setRunStatusFilter('all')">All</button>
+          <button onclick="setRunStatusFilter('active')">Active</button>
+          <button onclick="setRunStatusFilter('failed')">Failed</button>
+          <button onclick="setRunStatusFilter('success')">Success</button>
+        </div>
+
+        <div class="status-filter-pills">
           <button class="active" onclick="setPlatformFilter('all')">All</button>
           <button onclick="setPlatformFilter('github')">GitHub</button>
           <button onclick="setPlatformFilter('gitlab')">GitLab</button>
         </div>
+
         <input type="text" class="search-input" id="searchFilter" placeholder="Filter projects & pipelines..." oninput="renderContent()" />
       </div>
     </div>
@@ -596,20 +696,45 @@
   <!-- Trigger Modal -->
   <div class="modal-overlay" id="dispatchModal">
     <div class="modal">
-      <div class="modal-title">Trigger Pipeline Run</div>
-      <div class="form-group">
-        <label>Space & Repository</label>
-        <input type="text" class="form-input" id="modalRepo" readonly />
-        <input type="hidden" id="modalSpaceId" />
-        <input type="hidden" id="modalPlatform" />
+      <div class="modal-header">
+        <div class="modal-title">Trigger Pipeline Run</div>
+        <button class="btn" onclick="closeModal()">✕</button>
       </div>
-      <div class="form-group">
-        <label>Pipeline / Ref</label>
-        <input type="text" class="form-input" id="modalRef" value="main" />
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Space & Repository</label>
+          <input type="text" class="form-input" id="modalRepo" readonly />
+          <input type="hidden" id="modalSpaceId" />
+          <input type="hidden" id="modalPlatform" />
+        </div>
+        <div class="form-group">
+          <label>Pipeline / Ref</label>
+          <input type="text" class="form-input" id="modalRef" value="main" />
+        </div>
       </div>
-      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 12px;">
+      <div class="modal-footer">
         <button class="btn" onclick="closeModal()">Cancel</button>
         <button class="btn btn-primary" onclick="submitDispatch()">Run Pipeline</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step & Job Inspector Modal -->
+  <div class="modal-overlay" id="inspectorModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="inspectTitle">Pipeline Run Details</div>
+          <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;" id="inspectSubtitle"></div>
+        </div>
+        <button class="btn" onclick="closeInspector()">✕</button>
+      </div>
+      <div class="modal-body" id="inspectBody">
+        <div style="text-align: center; padding: 30px; color: var(--text-muted);">Loading job steps...</div>
+      </div>
+      <div class="modal-footer">
+        <span id="inspectFooterStatus" style="font-size: 12px; margin-right: auto; color: var(--text-muted);"></span>
+        <button class="btn" onclick="closeInspector()">Close</button>
       </div>
     </div>
   </div>
@@ -621,6 +746,7 @@
       spaceId: 'all',
       activeTab: 'repos',
       platformFilter: 'all',
+      runStatusFilter: 'all',
       data: null
     };
 
@@ -639,9 +765,34 @@
 
     function setPlatformFilter(plat) {
       state.platformFilter = plat;
-      document.querySelectorAll('.platform-filter button').forEach(b => b.classList.remove('active'));
-      event.target.classList.add('active');
+      document.querySelectorAll('.filter-bar .status-filter-pills:nth-child(2) button').forEach(b => {
+        b.classList.toggle('active', b.innerText.toLowerCase() === plat);
+      });
       renderContent();
+    }
+
+    function setRunStatusFilter(status) {
+      state.runStatusFilter = status;
+      document.querySelectorAll('#pipelineStatusFilters button').forEach(b => {
+        b.classList.toggle('active', b.innerText.toLowerCase() === status);
+      });
+      renderContent();
+    }
+
+    function filterByMetric(filterType) {
+      document.querySelectorAll('.metric-card').forEach(c => c.classList.remove('active-filter'));
+      if (filterType === 'active') {
+        document.getElementById('cardActive').classList.add('active-filter');
+        setTab('pipelines');
+        setRunStatusFilter('active');
+      } else if (filterType === 'failed') {
+        document.getElementById('cardFailed').classList.add('active-filter');
+        setTab('pipelines');
+        setRunStatusFilter('failed');
+      } else {
+        document.getElementById('cardAll').classList.add('active-filter');
+        setTab('repos');
+      }
     }
 
     async function refreshDashboard() {
@@ -682,7 +833,6 @@
       document.getElementById('metricActive').innerText = state.data.active_pipelines;
       document.getElementById('metricFailed').innerText = state.data.failed_pipelines;
       document.getElementById('metricSuccessRate').innerText = `${state.data.success_rate.toFixed(0)}%`;
-      document.getElementById('metricStars').innerText = state.data.total_stars;
       document.getElementById('tabRepoCount').innerText = state.data.total_repos;
       document.getElementById('tabRunsCount').innerText = state.data.recent_runs ? state.data.recent_runs.length : 0;
     }
@@ -690,10 +840,17 @@
     function setTab(tab) {
       state.activeTab = tab;
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      event.target.classList.add('active');
-
-      document.getElementById('reposView').style.display = tab === 'repos' ? 'grid' : 'none';
-      document.getElementById('pipelinesView').style.display = tab === 'pipelines' ? 'flex' : 'none';
+      if (tab === 'repos') {
+        document.getElementById('tabBtnRepos').classList.add('active');
+        document.getElementById('reposView').style.display = 'grid';
+        document.getElementById('pipelinesView').style.display = 'none';
+        document.getElementById('pipelineStatusFilters').style.display = 'none';
+      } else {
+        document.getElementById('tabBtnPipelines').classList.add('active');
+        document.getElementById('reposView').style.display = 'none';
+        document.getElementById('pipelinesView').style.display = 'flex';
+        document.getElementById('pipelineStatusFilters').style.display = 'flex';
+      }
       renderContent();
     }
 
@@ -735,7 +892,7 @@
         if (latestRun) {
           const statusClass = latestRun.status === 'in_progress' ? 'in_progress' : (latestRun.conclusion === 'success' ? 'success' : 'failure');
           const statusLabel = latestRun.status === 'in_progress' ? 'Running' : (latestRun.conclusion || latestRun.status);
-          runStatusPill = `<span class="run-pill ${statusClass}">● ${statusLabel}</span>`;
+          runStatusPill = `<span class="run-pill ${statusClass}" onclick="inspectRun('${r.space_id}', '${r.name}', ${latestRun.id}, '${r.platform}', '${escapeHtml(latestRun.name)}', '${escapeHtml(latestRun.head_branch)}')">● ${statusLabel}</span>`;
         }
 
         const platformBadge = r.platform === 'gitlab' 
@@ -758,7 +915,6 @@
               <a href="${r.html_url}" target="_blank" class="repo-name-link">
                 ${escapeHtml(r.name)}
               </a>
-              <span style="font-size: 12px; color: var(--text-secondary);">★ ${r.stars}</span>
             </div>
 
             <div class="repo-desc">${escapeHtml(r.description || 'No description provided.')}</div>
@@ -796,6 +952,14 @@
         runs = runs.filter(r => r.platform === state.platformFilter);
       }
 
+      if (state.runStatusFilter === 'active') {
+        runs = runs.filter(r => r.status === 'in_progress' || r.status === 'queued');
+      } else if (state.runStatusFilter === 'failed') {
+        runs = runs.filter(r => r.conclusion === 'failure' || r.conclusion === 'failed');
+      } else if (state.runStatusFilter === 'success') {
+        runs = runs.filter(r => r.conclusion === 'success');
+      }
+
       runs = runs.filter(r => 
         (r.repo_name && r.repo_name.toLowerCase().includes(query)) ||
         (r.name && r.name.toLowerCase().includes(query)) ||
@@ -804,7 +968,7 @@
       );
 
       if (runs.length === 0) {
-        container.innerHTML = `<div style="color: var(--text-muted);">No matching pipeline runs.</div>`;
+        container.innerHTML = `<div style="color: var(--text-muted); padding: 40px; text-align: center;">No matching pipeline runs found.</div>`;
         return;
       }
 
@@ -835,8 +999,9 @@
               </div>
             </div>
 
-            <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
               <span style="font-size: 12px; color: var(--text-muted);">${run.duration_sec ? run.duration_sec + 's' : ''}</span>
+              <button class="btn" onclick="inspectRun('${run.space_id}', '${run.repo_name}', ${run.id}, '${run.platform}', '${escapeHtml(run.name)}', '${escapeHtml(run.head_branch)}')">🔍 Steps</button>
               ${isInProgress ? `
                 <button class="btn btn-danger" onclick="cancelRun('${run.space_id}', '${run.repo_name}', ${run.id})">Cancel</button>
               ` : `
@@ -847,6 +1012,78 @@
           </div>
         `;
       }).join('');
+    }
+
+    async function inspectRun(spaceId, repo, runId, platform, name, branch) {
+      document.getElementById('inspectTitle').innerText = `${repo} — ${name}`;
+      document.getElementById('inspectSubtitle').innerText = `Branch: ${branch} | Run #${runId} on ${platform === 'gitlab' ? 'GitLab CI' : 'GitHub Actions'}`;
+      document.getElementById('inspectBody').innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted);">Fetching step-level progress...</div>`;
+      document.getElementById('inspectorModal').classList.add('open');
+
+      try {
+        const res = await fetch(`/api/actions/jobs?space_id=${encodeURIComponent(spaceId)}&repo=${encodeURIComponent(repo)}&run_id=${runId}`);
+        if (!res.ok) throw new Error(await res.text());
+        const jobs = await res.json();
+        renderJobSteps(jobs);
+      } catch (err) {
+        document.getElementById('inspectBody').innerHTML = `<div style="color: var(--danger); padding: 20px;">Failed to load step details: ${err.message}</div>`;
+      }
+    }
+
+    function renderJobSteps(jobs) {
+      const container = document.getElementById('inspectBody');
+      if (!jobs || jobs.length === 0) {
+        container.innerHTML = `<div style="color: var(--text-muted); padding: 20px;">No job or step details available for this run.</div>`;
+        return;
+      }
+
+      let totalSteps = 0;
+      let completedSteps = 0;
+
+      const jobsHtml = jobs.map(job => {
+        const isSuccess = job.conclusion === 'success';
+        const isFailure = job.conclusion === 'failure';
+        const isInProgress = job.status === 'in_progress';
+        const statusBadgeClass = isSuccess ? 'success' : (isFailure ? 'failure' : 'in_progress');
+
+        const stepsHtml = (job.steps || []).map(step => {
+          totalSteps++;
+          const stepDone = step.status === 'completed';
+          if (stepDone) completedSteps++;
+
+          const iconClass = step.conclusion === 'success' ? 'success' : (step.conclusion === 'failure' ? 'failure' : (step.status === 'in_progress' ? 'in_progress' : 'queued'));
+          const iconChar = step.conclusion === 'success' ? '✓' : (step.conclusion === 'failure' ? '✗' : (step.status === 'in_progress' ? '●' : '○'));
+
+          return `
+            <div class="step-item">
+              <div class="step-left">
+                <span class="step-icon ${iconClass}">${iconChar}</span>
+                <span style="font-weight: 500;">${escapeHtml(step.name)}</span>
+              </div>
+              <span style="color: var(--text-muted); font-size: 11px;">#${step.number}</span>
+            </div>
+          `;
+        }).join('');
+
+        return `
+          <div class="job-card">
+            <div class="job-header">
+              <span>Job: ${escapeHtml(job.name)}</span>
+              <span class="run-pill ${statusBadgeClass}">${job.status === 'in_progress' ? 'Running' : (job.conclusion || job.status)}</span>
+            </div>
+            <div class="steps-list">
+              ${stepsHtml || '<div style="padding: 10px 14px; color: var(--text-muted); font-size: 12px;">No sub-steps reported</div>'}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = jobsHtml;
+      document.getElementById('inspectFooterStatus').innerText = `Step Progress: ${completedSteps} / ${totalSteps} Steps Completed`;
+    }
+
+    function closeInspector() {
+      document.getElementById('inspectorModal').classList.remove('open');
     }
 
     function openDispatch(spaceId, repoId, repoName, platform) {

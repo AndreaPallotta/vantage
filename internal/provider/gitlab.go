@@ -182,7 +182,6 @@ func (p *GitLabProvider) ListRepositories(ctx context.Context, includeForks, inc
 				Owner:         prj.Namespace.Name,
 				Description:   prj.Description,
 				HTMLURL:       prj.WebURL,
-				Stars:         prj.StarCount,
 				Forks:         prj.ForksCount,
 				OpenIssues:    prj.OpenIssuesCount,
 				DefaultBranch: branch,
@@ -362,6 +361,66 @@ func (p *GitLabProvider) ListPipelines(ctx context.Context, projectID string, li
 	return runs, nil
 }
 
+func (p *GitLabProvider) GetRunJobs(ctx context.Context, projectID string, runID int64) ([]models.Job, error) {
+	path := fmt.Sprintf("/projects/%s/pipelines/%d/jobs", projectID, runID)
+	req, err := p.newRequest(ctx, "GET", path, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	type glJob struct {
+		ID         int64     `json:"id"`
+		Name       string    `json:"name"`
+		Stage      string    `json:"stage"`
+		Status     string    `json:"status"` // success, failed, running, pending, canceled
+		Duration   float64   `json:"duration"`
+		StartedAt  time.Time `json:"started_at"`
+		FinishedAt time.Time `json:"finished_at"`
+		WebURL     string    `json:"web_url"`
+	}
+
+	var glJobs []glJob
+	if _, err := p.do(req, &glJobs); err != nil {
+		return nil, err
+	}
+
+	var jobs []models.Job
+	for idx, j := range glJobs {
+		status := "completed"
+		conclusion := j.Status
+		if j.Status == "running" || j.Status == "pending" {
+			status = "in_progress"
+		} else if j.Status == "failed" {
+			conclusion = "failure"
+		}
+
+		jobs = append(jobs, models.Job{
+			ID:          j.ID,
+			RunID:       runID,
+			Name:        j.Name,
+			Stage:       j.Stage,
+			Status:      status,
+			Conclusion:  conclusion,
+			DurationSec: int64(j.Duration),
+			StartedAt:   j.StartedAt,
+			CompletedAt: j.FinishedAt,
+			HTMLURL:     j.WebURL,
+			Steps: []models.Step{
+				{
+					Number:      idx + 1,
+					Name:        fmt.Sprintf("[%s] %s", j.Stage, j.Name),
+					Status:      status,
+					Conclusion:  conclusion,
+					StartedAt:   j.StartedAt,
+					CompletedAt: j.FinishedAt,
+				},
+			},
+		})
+	}
+
+	return jobs, nil
+}
+
 func (p *GitLabProvider) TriggerPipeline(ctx context.Context, projectID string, ref string, inputs map[string]interface{}) error {
 	if ref == "" {
 		ref = "main"
@@ -443,13 +502,11 @@ func (p *GitLabProvider) GetOverview(ctx context.Context, includeForks, includeA
 
 	wg.Wait()
 
-	totalStars := 0
 	activeCount := 0
 	failedCount := 0
 	successCount := 0
 
 	for _, r := range enrichedRepos {
-		totalStars += r.Stars
 		if len(r.WorkflowRuns) > 0 {
 			latestRun := r.WorkflowRuns[0]
 			if latestRun.Status == "in_progress" || latestRun.Status == "queued" {
@@ -476,7 +533,6 @@ func (p *GitLabProvider) GetOverview(ctx context.Context, includeForks, includeA
 		ActivePipelines: activeCount,
 		FailedPipelines: failedCount,
 		SuccessRate:     successRate,
-		TotalStars:      totalStars,
 		LastRefreshed:   time.Now(),
 		Repositories:    enrichedRepos,
 		RecentRuns:      allRuns,

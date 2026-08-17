@@ -39,9 +39,8 @@ var statusCmd = &cobra.Command{
 
 		// Print Summary Banner
 		color.New(color.Bold, color.FgHiWhite).Printf("VANTAGE FLEET SUMMARY: %s\n", overview.SpaceName)
-		fmt.Printf("Projects: %s  |  Stars: %s  |  Active CI: %s  |  Failed CI: %s  |  Fleet Success Rate: %s\n\n",
+		fmt.Printf("Projects: %s  |  Active CI: %s  |  Failed CI: %s  |  Fleet Success Rate: %s\n\n",
 			color.CyanString("%d", overview.TotalRepos),
-			color.YellowString("%d", overview.TotalStars),
 			color.YellowString("%d", overview.ActivePipelines),
 			color.RedString("%d", overview.FailedPipelines),
 			color.GreenString("%.0f%%", overview.SuccessRate),
@@ -49,8 +48,8 @@ var statusCmd = &cobra.Command{
 
 		// Render Table
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', 0)
-		fmt.Fprintln(w, "PLATFORM\tPROJECT\tLANGUAGE\tSTARS\tBRANCH\tLATEST COMMIT\tRELEASE TAG\tPIPELINE STATUS")
-		fmt.Fprintln(w, "--------\t-------\t--------\t-----\t------\t-------------\t-----------\t---------------")
+		fmt.Fprintln(w, "PLATFORM\tPROJECT\tLANGUAGE\tBRANCH\tLATEST COMMIT\tRELEASE TAG\tPIPELINE STATUS")
+		fmt.Fprintln(w, "--------\t-------\t--------\t------\t-------------\t-----------\t---------------")
 
 		for _, r := range overview.Repositories {
 			platStr := color.MagentaString("GitHub")
@@ -94,11 +93,10 @@ var statusCmd = &cobra.Command{
 				lang = "-"
 			}
 
-			fmt.Fprintf(w, "%s\t%s\t%s\t%d\t%s\t%s\t%s\t%s\n",
+			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
 				platStr,
 				r.Name,
 				lang,
-				r.Stars,
 				r.DefaultBranch,
 				commitStr,
 				tagStr,

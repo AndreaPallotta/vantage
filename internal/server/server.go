@@ -55,10 +55,39 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("/api/actions/dispatch", s.handleDispatch)
 	s.mux.HandleFunc("/api/actions/rerun", s.handleRerun)
 	s.mux.HandleFunc("/api/actions/cancel", s.handleCancel)
+	s.mux.HandleFunc("/api/actions/jobs", s.handleGetJobs)
 	s.mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 	})
+}
+
+func (s *Server) handleGetJobs(w http.ResponseWriter, r *http.Request) {
+	spaceID := r.URL.Query().Get("space_id")
+	repo := r.URL.Query().Get("repo")
+	runIDStr := r.URL.Query().Get("run_id")
+
+	var runID int64
+	fmt.Sscanf(runIDStr, "%d", &runID)
+
+	if spaceID == "" && len(s.cfg.Spaces) > 0 {
+		spaceID = s.cfg.Spaces[0].ID
+	}
+
+	prov, err := s.manager.GetProvider(spaceID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	jobs, err := prov.GetRunJobs(r.Context(), repo, runID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to get jobs: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(jobs)
 }
 
 func (s *Server) handleListSpaces(w http.ResponseWriter, r *http.Request) {
