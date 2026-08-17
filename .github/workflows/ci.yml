@@ -4,9 +4,19 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - '**.md'
+      - 'CHANGELOG.md'
+      - 'README.md'
+      - 'docs/**'
   pull_request:
     branches:
       - main
+    paths-ignore:
+      - '**.md'
+      - 'CHANGELOG.md'
+      - 'README.md'
+      - 'docs/**'
 
 permissions:
   contents: read
