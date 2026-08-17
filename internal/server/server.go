@@ -12,6 +12,7 @@ import (
 
 	"github.com/AndreaPallotta/vantage/internal/config"
 	"github.com/AndreaPallotta/vantage/internal/manager"
+	"github.com/AndreaPallotta/vantage/internal/models"
 )
 
 //go:embed web/*
@@ -91,6 +92,45 @@ func (s *Server) handleGetJobs(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleListSpaces(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		var req models.SpaceConfig
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, "invalid request body", http.StatusBadRequest)
+			return
+		}
+
+		if req.ID == "" || req.Namespace == "" {
+			http.Error(w, "id and namespace are required", http.StatusBadRequest)
+			return
+		}
+
+		if req.Platform == "" {
+			req.Platform = models.PlatformGitHub
+		}
+
+		if req.BaseURL == "" {
+			if req.Platform == models.PlatformGitLab {
+				req.BaseURL = "https://gitlab.com/api/v4"
+			} else {
+				req.BaseURL = "https://api.github.com"
+			}
+		}
+
+		if req.Name == "" {
+			req.Name = fmt.Sprintf("%s (%s)", req.Platform, req.Namespace)
+		}
+
+		s.manager.AddSpace(req)
+		_ = s.cfg.Save()
+
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			"message": "space registered successfully",
+			"space":   req,
+		})
+		return
+	}
+
 	spaces := s.manager.ListSpaces()
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(spaces)

@@ -3,55 +3,74 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vantage | Multi-Platform Fleet & Pipeline Cockpit</title>
+  <title>VANTAGE // Multi-Space Mission Control & CI/CD Telemetry</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,500;0,600;0,700;1,600&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-base: #080c14;
-      --bg-surface: #0f172a;
-      --bg-card: #131d33;
-      --bg-card-hover: #192644;
-      --border-subtle: rgba(255, 255, 255, 0.08);
-      --border-focus: #38bdf8;
-      --accent: #38bdf8;
-      --accent-glow: rgba(56, 189, 248, 0.25);
-      --text-primary: #f8fafc;
-      --text-secondary: #94a3b8;
-      --text-muted: #64748b;
-      --success: #22c55e;
-      --success-glow: rgba(34, 197, 94, 0.2);
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --danger-glow: rgba(239, 68, 68, 0.2);
-      --info: #818cf8;
+      --void-bg: #070709;
+      --panel-bg: #0d0d12;
+      --panel-bg-alt: #121219;
+      --panel-hover: #181822;
+      --panel-border: rgba(255, 255, 255, 0.09);
+      --panel-border-glow: rgba(0, 240, 255, 0.25);
+      
+      --cyan: #00f0ff;
+      --cyan-dim: rgba(0, 240, 255, 0.12);
+      --cyan-glow: rgba(0, 240, 255, 0.4);
+      
+      --emerald: #00ff9d;
+      --emerald-dim: rgba(0, 255, 157, 0.12);
+      
+      --amber: #ffaa00;
+      --amber-dim: rgba(255, 170, 0, 0.12);
+      
+      --crimson: #ff2d55;
+      --crimson-dim: rgba(255, 45, 85, 0.15);
+      
       --gitlab: #fc6d26;
-      --github: #6366f1;
-      --radius-sm: 6px;
-      --radius-md: 10px;
-      --radius-lg: 16px;
+      --gitlab-dim: rgba(252, 109, 38, 0.15);
+      
+      --github: #818cf8;
+      --github-dim: rgba(129, 140, 248, 0.15);
+      
+      --text-main: #f0f4f8;
+      --text-muted: #798399;
+      --text-dim: #434c5e;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    
     body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: var(--bg-base);
-      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+      background-color: var(--void-bg);
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(0, 240, 255, 0.04) 0%, transparent 60%),
+        linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      background-size: 100% 100%, 32px 32px, 32px 32px;
+      color: var(--text-main);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      line-height: 1.5;
+      line-height: 1.4;
+      font-size: 13px;
     }
 
-    code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
+    /* Headings & Brand */
+    h1, h2, h3, h4, .brand-title, .metric-value, .tab-btn {
+      font-family: 'Chakra Petch', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
 
-    /* Top Navigation Header */
+    /* Header Navigation */
     header {
-      background: rgba(15, 23, 42, 0.9);
-      backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border-subtle);
-      padding: 12px 28px;
+      background: rgba(13, 13, 18, 0.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--panel-border);
+      padding: 12px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -60,410 +79,461 @@
       z-index: 100;
     }
 
-    .brand {
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .hud-badge-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      background: #000000;
+      border: 1px solid var(--cyan);
+      box-shadow: 0 0 12px var(--cyan-glow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--cyan);
+      font-weight: 700;
+      font-size: 16px;
+      clip-path: polygon(0 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%);
+    }
+
+    .brand-title {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-title span {
+      color: var(--cyan);
+      text-shadow: 0 0 10px var(--cyan-glow);
+    }
+
+    .telemetry-tag {
+      font-size: 10px;
+      padding: 2px 6px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-muted);
+      border-radius: 2px;
+      font-weight: 600;
+    }
+
+    .live-pulse {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      color: var(--emerald);
+      border: 1px solid rgba(0, 255, 157, 0.3);
+      background: var(--emerald-dim);
+      padding: 2px 8px;
+      border-radius: 2px;
+      font-weight: 600;
+    }
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--emerald);
+      box-shadow: 0 0 8px var(--emerald);
+      animation: blink 2s infinite ease-in-out;
+    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    .header-actions {
       display: flex;
       align-items: center;
       gap: 12px;
     }
-    .brand-logo {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      background: linear-gradient(135deg, #38bdf8 0%, #6366f1 50%, #fc6d26 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      color: #090d16;
-      font-size: 16px;
-      box-shadow: 0 0 16px var(--accent-glow);
-    }
-    .brand-title {
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .brand-badge {
-      font-size: 11px;
-      padding: 2px 8px;
-      background: rgba(56, 189, 248, 0.12);
-      color: var(--accent);
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      border-radius: 12px;
-      font-weight: 600;
-    }
 
-    .header-controls {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-    .space-selector {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      padding: 6px 12px;
-      border-radius: var(--radius-sm);
-    }
-    .space-selector select {
-      background: none;
-      border: none;
-      color: var(--text-primary);
-      font-size: 13px;
-      font-weight: 600;
-      font-family: inherit;
-      outline: none;
-      cursor: pointer;
-    }
-    .space-selector select option {
-      background: #0f172a;
-      color: #ffffff;
-    }
-
-    .btn {
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-primary);
+    /* Tech Buttons */
+    .hud-btn {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      color: var(--text-main);
       padding: 6px 14px;
-      border-radius: var(--radius-sm);
-      font-size: 13px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 6px;
       transition: all 0.15s ease;
-      font-family: inherit;
+      text-transform: uppercase;
     }
-    .btn:hover {
-      background: var(--bg-card-hover);
-      border-color: var(--accent);
+    .hud-btn:hover {
+      background: var(--panel-hover);
+      border-color: var(--cyan);
+      box-shadow: 0 0 10px var(--cyan-dim);
     }
-    .btn-primary {
-      background: #0284c7;
-      border-color: #38bdf8;
+    .hud-btn-primary {
+      background: var(--cyan-dim);
+      border-color: var(--cyan);
+      color: var(--cyan);
+      box-shadow: 0 0 12px var(--cyan-dim);
+    }
+    .hud-btn-primary:hover {
+      background: var(--cyan);
+      color: #000000;
+      box-shadow: 0 0 18px var(--cyan-glow);
+    }
+    .hud-btn-danger {
+      background: var(--crimson-dim);
+      border-color: var(--crimson);
+      color: var(--crimson);
+    }
+    .hud-btn-danger:hover {
+      background: var(--crimson);
       color: #ffffff;
     }
-    .btn-primary:hover { background: #0369a1; }
-    .btn-danger {
-      background: rgba(239, 68, 68, 0.15);
-      border-color: rgba(239, 68, 68, 0.4);
-      color: #fca5a5;
+
+    .space-dropdown {
+      background: var(--panel-bg-alt);
+      border: 1px solid var(--panel-border);
+      padding: 4px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    .btn-danger:hover { background: rgba(239, 68, 68, 0.3); }
+    .space-dropdown select {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+    }
+    .space-dropdown select option {
+      background: #0d0d12;
+      color: #ffffff;
+    }
 
     main {
-      max-width: 1440px;
+      max-width: 1520px;
       width: 100%;
       margin: 0 auto;
-      padding: 24px 28px;
+      padding: 20px 24px;
       flex: 1;
     }
 
-    /* Metric Cards Grid - Interactive click filters */
-    .metrics-grid {
+    /* Metric Telemetry Array */
+    .metric-array {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      margin-bottom: 24px;
+      gap: 12px;
+      margin-bottom: 20px;
     }
-    .metric-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      padding: 16px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
+
+    .telemetry-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      padding: 14px 18px;
+      position: relative;
       cursor: pointer;
       user-select: none;
-      transition: all 0.15s ease;
+      transition: all 0.15s;
+      overflow: hidden;
     }
-    .metric-card:hover {
-      transform: translateY(-2px);
-      border-color: rgba(56, 189, 248, 0.4);
-      background: var(--bg-card-hover);
+    .telemetry-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: rgba(255, 255, 255, 0.1);
     }
-    .metric-card.active-filter {
-      border-color: var(--accent);
-      box-shadow: 0 0 16px var(--accent-glow);
+    .telemetry-card:hover {
+      border-color: var(--cyan);
+      background: var(--panel-hover);
+      transform: translateY(-1px);
     }
-    .metric-label {
-      font-size: 12px;
-      color: var(--text-secondary);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+    .telemetry-card.active-telemetry {
+      border-color: var(--cyan);
+      box-shadow: inset 0 0 20px var(--cyan-dim), 0 0 14px var(--cyan-dim);
+    }
+    .telemetry-card.active-telemetry::before {
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+    }
+
+    .telemetry-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .telemetry-value-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-top: 6px;
     }
     .metric-value {
-      font-size: 28px;
-      font-weight: 800;
-      color: var(--text-primary);
-      letter-spacing: -1px;
+      font-size: 32px;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1;
     }
-    .metric-value.success { color: var(--success); }
-    .metric-value.danger { color: var(--danger); }
-    .metric-value.accent { color: var(--accent); }
+    .metric-value.cyan { color: var(--cyan); text-shadow: 0 0 12px var(--cyan-glow); }
+    .metric-value.emerald { color: var(--emerald); text-shadow: 0 0 12px var(--emerald-dim); }
+    .metric-value.amber { color: var(--amber); text-shadow: 0 0 12px var(--amber-dim); }
+    .metric-value.crimson { color: var(--crimson); text-shadow: 0 0 12px var(--crimson-dim); }
 
-    /* Tabs Bar */
-    .tabs-bar {
+    /* Control HUD Bar */
+    .control-hud {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      padding: 10px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid var(--border-subtle);
-      margin-bottom: 20px;
       gap: 16px;
-    }
-    .tabs { display: flex; gap: 8px; }
-    .tab-btn {
-      background: none;
-      border: none;
-      color: var(--text-secondary);
-      font-size: 14px;
-      font-weight: 600;
-      padding: 10px 16px;
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      transition: all 0.15s;
-    }
-    .tab-btn:hover { color: var(--text-primary); }
-    .tab-btn.active {
-      color: var(--accent);
-      border-bottom-color: var(--accent);
+      margin-bottom: 16px;
     }
 
-    .filter-bar {
+    .tab-group {
+      display: flex;
+      gap: 4px;
+    }
+    .tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tab-btn:hover {
+      color: var(--text-main);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+    .tab-btn.active {
+      background: rgba(0, 240, 255, 0.08);
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    .filter-group {
       display: flex;
       align-items: center;
       gap: 10px;
     }
-    .status-filter-pills {
+    .seg-pills {
       display: flex;
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
+      background: var(--panel-bg-alt);
+      border: 1px solid var(--panel-border);
       padding: 2px;
-      gap: 2px;
     }
-    .status-filter-pills button {
-      background: none;
+    .seg-pills button {
+      background: transparent;
       border: none;
-      color: var(--text-secondary);
-      font-size: 11px;
-      font-weight: 700;
+      color: var(--text-muted);
       padding: 4px 10px;
-      border-radius: 4px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 600;
       cursor: pointer;
       text-transform: uppercase;
     }
-    .status-filter-pills button.active {
-      background: rgba(56, 189, 248, 0.18);
-      color: var(--accent);
+    .seg-pills button.active {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
     }
-    .search-input {
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-primary);
-      padding: 7px 12px;
-      border-radius: var(--radius-sm);
-      font-size: 13px;
+
+    .search-box {
+      background: var(--panel-bg-alt);
+      border: 1px solid var(--panel-border);
+      color: var(--text-main);
+      padding: 6px 12px;
       font-family: inherit;
-      width: 220px;
+      font-size: 12px;
+      width: 240px;
       outline: none;
     }
-    .search-input:focus { border-color: var(--accent); }
-
-    /* Repositories Grid */
-    .repos-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-      gap: 18px;
+    .search-box:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan-dim);
     }
-    .repo-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      padding: 18px;
+
+    /* Grid Layout for Repositories */
+    .grid-view {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 14px;
+    }
+
+    .repo-module {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
-      transition: all 0.2s ease;
+      gap: 12px;
+      transition: all 0.15s;
       position: relative;
     }
-    .repo-card:hover {
-      background: var(--bg-card-hover);
-      border-color: rgba(56, 189, 248, 0.4);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    .repo-module:hover {
+      border-color: var(--panel-border-glow);
+      background: var(--panel-hover);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     }
-    .repo-header {
+
+    .module-top {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      gap: 12px;
+      gap: 8px;
     }
-    .repo-name-link {
-      font-size: 16px;
+    .repo-anchor {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 15px;
       font-weight: 700;
-      color: var(--accent);
+      color: #ffffff;
       text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
+      letter-spacing: 0.5px;
     }
-    .repo-name-link:hover { text-decoration: underline; }
-    .repo-desc {
-      font-size: 13px;
-      color: var(--text-secondary);
-      line-height: 1.4;
+    .repo-anchor:hover {
+      color: var(--cyan);
+      text-shadow: 0 0 8px var(--cyan-glow);
+    }
+
+    .platform-tag {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 2px;
+      text-transform: uppercase;
+    }
+    .platform-github {
+      background: var(--github-dim);
+      border: 1px solid rgba(129, 140, 248, 0.4);
+      color: var(--github);
+    }
+    .platform-gitlab {
+      background: var(--gitlab-dim);
+      border: 1px solid rgba(252, 109, 38, 0.4);
+      color: var(--gitlab);
+    }
+
+    .repo-summary {
+      font-size: 12px;
+      color: var(--text-muted);
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
-      min-height: 36px;
+      min-height: 34px;
     }
 
-    .repo-badges {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      align-items: center;
-    }
-    .badge {
+    .commit-strip {
+      background: rgba(0, 0, 0, 0.35);
+      border-left: 2px solid rgba(255, 255, 255, 0.15);
+      padding: 6px 10px;
       font-size: 11px;
-      font-weight: 600;
-      padding: 2px 8px;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.06);
-      color: var(--text-secondary);
-    }
-    .badge-github {
-      background: rgba(99, 102, 241, 0.15);
-      color: #a5b4fc;
-      border: 1px solid rgba(99, 102, 241, 0.3);
-    }
-    .badge-gitlab {
-      background: rgba(252, 109, 38, 0.15);
-      color: #fdba74;
-      border: 1px solid rgba(252, 109, 38, 0.3);
-    }
-    .badge-tag {
-      background: rgba(34, 197, 94, 0.12);
-      color: var(--success);
-      border: 1px solid rgba(34, 197, 94, 0.3);
-    }
-    .badge-lang {
-      background: rgba(129, 140, 248, 0.12);
-      color: var(--info);
-      border: 1px solid rgba(129, 140, 248, 0.3);
-    }
-
-    .repo-commit-box {
-      background: rgba(0, 0, 0, 0.25);
-      border-radius: var(--radius-sm);
-      padding: 8px 12px;
-      font-size: 12px;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 2px;
     }
-    .commit-row-top {
+    .commit-meta {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      color: var(--text-muted);
+      color: var(--text-dim);
     }
-    .commit-msg {
-      color: var(--text-primary);
+    .commit-text {
+      color: var(--text-main);
+      white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      white-space: nowrap;
-      font-weight: 500;
     }
 
-    .run-pill {
-      font-size: 11px;
-      font-weight: 600;
-      padding: 3px 8px;
-      border-radius: 4px;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      cursor: pointer;
-    }
-    .run-pill.success { background: rgba(34, 197, 94, 0.15); color: #86efac; }
-    .run-pill.failure { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
-    .run-pill.in_progress { background: rgba(245, 158, 11, 0.15); color: #fde68a; }
-
-    .repo-actions {
+    .module-footer {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-top: auto;
       padding-top: 10px;
-      border-top: 1px solid var(--border-subtle);
+      border-top: 1px solid var(--panel-border);
+      margin-top: auto;
     }
 
-    /* Pipelines List */
-    .pipelines-list {
+    /* Pipeline Status Indicator Pill */
+    .status-pill {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 2px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .status-pill.success { background: var(--emerald-dim); border: 1px solid var(--emerald); color: var(--emerald); }
+    .status-pill.failure { background: var(--crimson-dim); border: 1px solid var(--crimson); color: var(--crimson); }
+    .status-pill.in_progress { background: var(--amber-dim); border: 1px solid var(--amber); color: var(--amber); }
+    .status-pill.idle { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-muted); }
+
+    /* Telemetry Stream List (Pipelines) */
+    .telemetry-stream {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
-    .pipeline-row {
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      padding: 14px 20px;
+    .stream-row {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      padding: 12px 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 16px;
       transition: all 0.15s;
     }
-    .pipeline-row:hover {
-      background: var(--bg-card-hover);
-      border-color: rgba(56, 189, 248, 0.3);
+    .stream-row:hover {
+      border-color: var(--panel-border-glow);
+      background: var(--panel-hover);
     }
-    .pipeline-left {
+    .stream-left {
       display: flex;
       align-items: center;
       gap: 14px;
       flex: 1;
     }
-    .pipeline-status-icon {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
+    .stream-symbol {
+      width: 24px;
+      height: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
-      font-weight: bold;
-      flex-shrink: 0;
-    }
-    .status-success { background: var(--success-glow); color: var(--success); }
-    .status-failure { background: var(--danger-glow); color: var(--danger); }
-    .status-in_progress { background: rgba(245, 158, 11, 0.2); color: var(--warning); animation: pulse 1.5s infinite; }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+      font-weight: 700;
+      font-size: 13px;
     }
 
-    /* Step Inspector Drawer / Modal */
-    .modal-overlay {
+    /* Modals */
+    .hud-modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(6px);
+      background: rgba(7, 7, 9, 0.85);
+      backdrop-filter: blur(8px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -472,129 +542,133 @@
       pointer-events: none;
       transition: opacity 0.2s ease;
     }
-    .modal-overlay.open {
+    .hud-modal-overlay.open {
       opacity: 1;
       pointer-events: auto;
     }
-    .modal {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-lg);
+    .hud-modal {
+      background: #0d0d12;
+      border: 1px solid var(--cyan);
+      box-shadow: 0 0 30px rgba(0, 240, 255, 0.15), 0 20px 40px rgba(0, 0, 0, 0.8);
       width: 90%;
-      max-width: 680px;
-      max-height: 85vh;
+      max-width: 620px;
+      max-height: 90vh;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
       overflow: hidden;
+      position: relative;
     }
-    .modal-header {
-      padding: 18px 24px;
-      border-bottom: 1px solid var(--border-subtle);
+    .modal-head {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--panel-border);
       display: flex;
       align-items: center;
       justify-content: space-between;
+      background: rgba(0, 240, 255, 0.03);
     }
-    .modal-body {
-      padding: 20px 24px;
+    .modal-head h3 {
+      font-size: 16px;
+      color: #ffffff;
+    }
+    .modal-content {
+      padding: 20px;
       overflow-y: auto;
-      flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
     }
-    .modal-footer {
-      padding: 14px 24px;
-      border-top: 1px solid var(--border-subtle);
+    .modal-actions {
+      padding: 14px 20px;
+      border-top: 1px solid var(--panel-border);
       display: flex;
       align-items: center;
       justify-content: flex-end;
       gap: 10px;
+      background: rgba(0, 0, 0, 0.2);
     }
 
-    /* Step List Tree */
-    .job-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
-      overflow: hidden;
-    }
-    .job-header {
-      padding: 10px 14px;
-      background: rgba(0,0,0,0.2);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-weight: 700;
-      font-size: 13px;
-    }
-    .steps-list {
+    .form-field {
       display: flex;
       flex-direction: column;
+      gap: 5px;
     }
-    .step-item {
-      padding: 8px 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 12px;
-      border-top: 1px solid rgba(255,255,255,0.04);
-    }
-    .step-item:nth-child(even) {
-      background: rgba(255,255,255,0.02);
-    }
-    .step-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .step-icon {
-      font-size: 12px;
-      width: 16px;
-      height: 16px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .step-icon.success { color: var(--success); }
-    .step-icon.failure { color: var(--danger); }
-    .step-icon.in_progress { color: var(--warning); animation: pulse 1s infinite; }
-    .step-icon.queued { color: var(--text-muted); }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .form-group label {
-      font-size: 12px;
+    .form-field label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
       font-weight: 600;
-      color: var(--text-secondary);
     }
-    .form-input, .form-select {
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-primary);
+    .hud-input {
+      background: var(--panel-bg-alt);
+      border: 1px solid var(--panel-border);
+      color: var(--text-main);
       padding: 8px 12px;
-      border-radius: var(--radius-sm);
-      font-size: 13px;
       font-family: inherit;
+      font-size: 12px;
       outline: none;
     }
-    .form-input:focus, .form-select:focus { border-color: var(--accent); }
+    .hud-input:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 10px var(--cyan-dim);
+    }
 
-    #toast {
+    /* Platform Radio Buttons in Modal */
+    .platform-selector-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .platform-choice {
+      border: 1px solid var(--panel-border);
+      padding: 10px 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--panel-bg-alt);
+      transition: all 0.15s;
+    }
+    .platform-choice.selected {
+      border-color: var(--cyan);
+      background: var(--cyan-dim);
+      color: var(--cyan);
+    }
+
+    /* Step Inspector Tree */
+    .job-block {
+      background: var(--panel-bg-alt);
+      border: 1px solid var(--panel-border);
+      margin-bottom: 10px;
+    }
+    .job-block-header {
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--panel-border);
+      display: flex;
+      justify-content: space-between;
+      font-weight: 700;
+      font-size: 12px;
+    }
+    .step-entry {
+      padding: 7px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+    .step-entry:last-child { border-bottom: none; }
+
+    #hudToast {
       position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: #0f172a;
-      border: 1px solid var(--border-subtle);
-      color: var(--text-primary);
-      padding: 12px 20px;
-      border-radius: var(--radius-md);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-      font-size: 13px;
-      font-weight: 500;
+      bottom: 20px;
+      right: 20px;
+      background: #0d0d12;
+      border: 1px solid var(--cyan);
+      color: var(--text-main);
+      padding: 10px 18px;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+      font-size: 12px;
       z-index: 2000;
       display: none;
     }
@@ -602,144 +676,228 @@
 </head>
 <body>
 
+  <!-- Top Flight Control Header -->
   <header>
-    <div class="brand">
+    <div class="brand-section">
       <div class="brand-logo">V</div>
       <div class="brand-title">
-        Vantage
-        <span class="brand-badge">Mission Control</span>
+        VANTAGE <span>//</span> MISSION CONTROL
+      </div>
+      <div class="hud-badge-container">
+        <span class="telemetry-tag">[SYS: NOMINAL]</span>
+        <span class="live-pulse"><span class="pulse-dot"></span> TELEMETRY LIVE</span>
       </div>
     </div>
 
-    <div class="header-controls">
-      <div class="space-selector">
-        <span style="font-size: 12px; color: var(--text-muted);">Space:</span>
+    <div class="header-actions">
+      <div class="space-dropdown">
+        <span style="font-size: 10px; color: var(--text-muted);">SPACE:</span>
         <select id="spaceSelect" onchange="onSpaceChange()">
-          <option value="all">🌐 All Spaces (Unified Fleet)</option>
+          <option value="all">ALL SPACES (UNIFIED FLEET)</option>
         </select>
       </div>
 
-      <button class="btn" onclick="refreshDashboard()" id="refreshBtn">
-        <span id="refreshIcon">↻</span> Refresh
+      <button class="hud-btn hud-btn-primary" onclick="openAddSpaceModal()">
+        + ADD SPACE
+      </button>
+
+      <button class="hud-btn" onclick="refreshDashboard()" id="refreshBtn">
+        SYNC
       </button>
     </div>
   </header>
 
   <main>
-    <!-- Interactive Metric Cards Grid -->
-    <div class="metrics-grid">
-      <div class="metric-card" onclick="filterByMetric('all')" title="Click to view all projects" id="cardAll">
-        <div class="metric-label">
-          <span>Projects</span>
-          <span style="font-size: 10px; color: var(--text-muted);">ALL</span>
+    <!-- Telemetry Metric Array -->
+    <div class="metric-array">
+      <div class="telemetry-card" onclick="filterByMetric('all')" id="cardAll" title="Click to view all projects">
+        <div class="telemetry-header">
+          <span>PROJECTS IN FLEET</span>
+          <span style="color: var(--text-dim);">[01]</span>
         </div>
-        <span class="metric-value accent" id="metricRepos">--</span>
+        <div class="telemetry-value-row">
+          <span class="metric-value cyan" id="metricRepos">--</span>
+          <span class="telemetry-tag">ACTIVE REPOS</span>
+        </div>
       </div>
 
-      <div class="metric-card" onclick="filterByMetric('active')" title="Click to view active pipelines" id="cardActive">
-        <div class="metric-label">
-          <span>Active Pipelines</span>
-          <span style="font-size: 10px; color: var(--warning);">LIVE</span>
+      <div class="telemetry-card" onclick="filterByMetric('active')" id="cardActive" title="Click to view active pipelines">
+        <div class="telemetry-header">
+          <span>RUNNING PIPELINES</span>
+          <span style="color: var(--amber);">[LIVE]</span>
         </div>
-        <span class="metric-value" id="metricActive">--</span>
+        <div class="telemetry-value-row">
+          <span class="metric-value amber" id="metricActive">--</span>
+          <span class="telemetry-tag" style="border-color: var(--amber); color: var(--amber);">IN PROGRESS</span>
+        </div>
       </div>
 
-      <div class="metric-card" onclick="filterByMetric('failed')" title="Click to view failed pipelines" id="cardFailed">
-        <div class="metric-label">
-          <span>Failed (Latest)</span>
-          <span style="font-size: 10px; color: var(--danger);">NEEDS ATTENTION</span>
+      <div class="telemetry-card" onclick="filterByMetric('failed')" id="cardFailed" title="Click to view failed pipelines">
+        <div class="telemetry-header">
+          <span>FAILED (LATEST)</span>
+          <span style="color: var(--crimson);">[ALERT]</span>
         </div>
-        <span class="metric-value danger" id="metricFailed">--</span>
+        <div class="telemetry-value-row">
+          <span class="metric-value crimson" id="metricFailed">--</span>
+          <span class="telemetry-tag" style="border-color: var(--crimson); color: var(--crimson);">REQUIRES ACTION</span>
+        </div>
       </div>
 
-      <div class="metric-card" onclick="filterByMetric('all')" title="Click to view fleet health" id="cardSuccess">
-        <div class="metric-label">
-          <span>Fleet Health Rate</span>
-          <span style="font-size: 10px; color: var(--success);">LATEST RUNS</span>
+      <div class="telemetry-card" onclick="filterByMetric('all')" id="cardSuccess" title="Click to view fleet health">
+        <div class="telemetry-header">
+          <span>FLEET HEALTH RATE</span>
+          <span style="color: var(--emerald);">[OK]</span>
         </div>
-        <span class="metric-value success" id="metricSuccessRate">--%</span>
-      </div>
-    </div>
-
-    <!-- Tabs & Filter Bar -->
-    <div class="tabs-bar">
-      <div class="tabs">
-        <button class="tab-btn active" id="tabBtnRepos" onclick="setTab('repos')">Repositories (<span id="tabRepoCount">0</span>)</button>
-        <button class="tab-btn" id="tabBtnPipelines" onclick="setTab('pipelines')">Live Pipelines Feed (<span id="tabRunsCount">0</span>)</button>
-      </div>
-
-      <div class="filter-bar">
-        <div class="status-filter-pills" id="pipelineStatusFilters" style="display: none;">
-          <button class="active" onclick="setRunStatusFilter('all')">All</button>
-          <button onclick="setRunStatusFilter('active')">Active</button>
-          <button onclick="setRunStatusFilter('failed')">Failed</button>
-          <button onclick="setRunStatusFilter('success')">Success</button>
+        <div class="telemetry-value-row">
+          <span class="metric-value emerald" id="metricSuccessRate">--%</span>
+          <span class="telemetry-tag" style="border-color: var(--emerald); color: var(--emerald);">SUCCESS RATIO</span>
         </div>
-
-        <div class="status-filter-pills">
-          <button class="active" onclick="setPlatformFilter('all')">All</button>
-          <button onclick="setPlatformFilter('github')">GitHub</button>
-          <button onclick="setPlatformFilter('gitlab')">GitLab</button>
-        </div>
-
-        <input type="text" class="search-input" id="searchFilter" placeholder="Filter projects & pipelines..." oninput="renderContent()" />
       </div>
     </div>
 
-    <!-- Repositories Grid Container -->
-    <div id="reposView" class="repos-grid"></div>
+    <!-- Control HUD Bar -->
+    <div class="control-hud">
+      <div class="tab-group">
+        <button class="tab-btn active" id="tabBtnRepos" onclick="setTab('repos')">
+          REPOSITORIES (<span id="tabRepoCount">0</span>)
+        </button>
+        <button class="tab-btn" id="tabBtnPipelines" onclick="setTab('pipelines')">
+          PIPELINES TELEMETRY (<span id="tabRunsCount">0</span>)
+        </button>
+      </div>
 
-    <!-- Pipelines List Container -->
-    <div id="pipelinesView" class="pipelines-list" style="display: none;"></div>
+      <div class="filter-group">
+        <div class="seg-pills" id="pipelineFilters" style="display: none;">
+          <button class="active" onclick="setRunStatusFilter('all')">ALL</button>
+          <button onclick="setRunStatusFilter('active')">ACTIVE</button>
+          <button onclick="setRunStatusFilter('failed')">FAILED</button>
+          <button onclick="setRunStatusFilter('success')">SUCCESS</button>
+        </div>
+
+        <div class="seg-pills">
+          <button class="active" onclick="setPlatformFilter('all')">ALL</button>
+          <button onclick="setPlatformFilter('github')">GITHUB</button>
+          <button onclick="setPlatformFilter('gitlab')">GITLAB</button>
+        </div>
+
+        <input type="text" class="search-box" id="searchFilter" placeholder="SEARCH REPOS & RUNS..." oninput="renderContent()" />
+      </div>
+    </div>
+
+    <!-- Grid View for Repos -->
+    <div id="reposView" class="grid-view"></div>
+
+    <!-- Stream View for Pipelines -->
+    <div id="pipelinesView" class="telemetry-stream" style="display: none;"></div>
   </main>
 
-  <!-- Trigger Modal -->
-  <div class="modal-overlay" id="dispatchModal">
-    <div class="modal">
-      <div class="modal-header">
-        <div class="modal-title">Trigger Pipeline Run</div>
-        <button class="btn" onclick="closeModal()">✕</button>
+  <!-- Add Space Modal -->
+  <div class="hud-modal-overlay" id="addSpaceModal">
+    <div class="hud-modal">
+      <div class="modal-head">
+        <h3>// CONNECT NEW SPACE OR NAMESPACE</h3>
+        <button class="hud-btn" onclick="closeAddSpaceModal()">✕</button>
       </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label>Space & Repository</label>
-          <input type="text" class="form-input" id="modalRepo" readonly />
+      <div class="modal-content">
+        <div class="form-field">
+          <label>Hosting Platform</label>
+          <div class="platform-selector-group">
+            <div class="platform-choice selected" id="platChoiceGH" onclick="selectPlatformForm('github')">
+              <span>🐙</span> <strong>GitHub</strong> (User or Org)
+            </div>
+            <div class="platform-choice" id="platChoiceGL" onclick="selectPlatformForm('gitlab')">
+              <span>🦊</span> <strong>GitLab</strong> (Group / Self-Hosted)
+            </div>
+          </div>
+          <input type="hidden" id="addPlat" value="github" />
+        </div>
+
+        <div class="form-field">
+          <label>Space ID (Unique Slug)</label>
+          <input type="text" class="hud-input" id="addSpaceId" placeholder="e.g. gitlab-core-team" />
+        </div>
+
+        <div class="form-field">
+          <label>Display Name</label>
+          <input type="text" class="hud-input" id="addSpaceName" placeholder="e.g. GitLab Infrastructure Core" />
+        </div>
+
+        <div class="form-field">
+          <label>Namespace / Organization / Group</label>
+          <input type="text" class="hud-input" id="addNamespace" placeholder="e.g. AndreaPallotta or infra-team/subgroup" />
+        </div>
+
+        <div class="form-field">
+          <label>API Base URL</label>
+          <input type="text" class="hud-input" id="addBaseUrl" value="https://api.github.com" placeholder="https://gitlab.com/api/v4 or self-hosted URL" />
+        </div>
+
+        <div class="form-field">
+          <label>API Token / Access Token</label>
+          <input type="password" class="hud-input" id="addToken" placeholder="Personal Access Token (PAT) / API Key" />
+        </div>
+
+        <div class="form-field" id="subgroupsOption" style="display: none;">
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" id="addSubgroups" checked />
+            <span>Include nested subgroups recursively</span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="hud-btn" onclick="closeAddSpaceModal()">CANCEL</button>
+        <button class="hud-btn hud-btn-primary" onclick="submitAddSpace()">CONNECT SPACE</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dispatch Modal -->
+  <div class="hud-modal-overlay" id="dispatchModal">
+    <div class="hud-modal">
+      <div class="modal-head">
+        <h3>// TRIGGER WORKFLOW DISPATCH</h3>
+        <button class="hud-btn" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-content">
+        <div class="form-field">
+          <label>Project</label>
+          <input type="text" class="hud-input" id="modalRepo" readonly />
           <input type="hidden" id="modalSpaceId" />
           <input type="hidden" id="modalPlatform" />
         </div>
-        <div class="form-group">
-          <label>Pipeline / Ref</label>
-          <input type="text" class="form-input" id="modalRef" value="main" />
+        <div class="form-field">
+          <label>Target Ref / Branch</label>
+          <input type="text" class="hud-input" id="modalRef" value="main" />
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn" onclick="closeModal()">Cancel</button>
-        <button class="btn btn-primary" onclick="submitDispatch()">Run Pipeline</button>
+      <div class="modal-actions">
+        <button class="hud-btn" onclick="closeModal()">CANCEL</button>
+        <button class="hud-btn hud-btn-primary" onclick="submitDispatch()">TRIGGER RUN</button>
       </div>
     </div>
   </div>
 
-  <!-- Step & Job Inspector Modal -->
-  <div class="modal-overlay" id="inspectorModal">
-    <div class="modal">
-      <div class="modal-header">
+  <!-- Step Inspector Modal -->
+  <div class="hud-modal-overlay" id="inspectorModal">
+    <div class="hud-modal">
+      <div class="modal-head">
         <div>
-          <div class="modal-title" id="inspectTitle">Pipeline Run Details</div>
-          <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;" id="inspectSubtitle"></div>
+          <h3 id="inspectTitle">// PIPELINE INSPECTION</h3>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;" id="inspectSubtitle"></div>
         </div>
-        <button class="btn" onclick="closeInspector()">✕</button>
+        <button class="hud-btn" onclick="closeInspector()">✕</button>
       </div>
-      <div class="modal-body" id="inspectBody">
-        <div style="text-align: center; padding: 30px; color: var(--text-muted);">Loading job steps...</div>
+      <div class="modal-content" id="inspectBody">
+        <div style="text-align: center; padding: 30px; color: var(--text-muted);">FETCHING STEP TELEMETRY...</div>
       </div>
-      <div class="modal-footer">
-        <span id="inspectFooterStatus" style="font-size: 12px; margin-right: auto; color: var(--text-muted);"></span>
-        <button class="btn" onclick="closeInspector()">Close</button>
+      <div class="modal-actions">
+        <span id="inspectFooterStatus" style="font-size: 11px; margin-right: auto; color: var(--cyan);"></span>
+        <button class="hud-btn" onclick="closeInspector()">CLOSE</button>
       </div>
     </div>
   </div>
 
-  <div id="toast"></div>
+  <div id="hudToast"></div>
 
   <script>
     let state = {
@@ -751,9 +909,9 @@
     };
 
     function showToast(msg, isError = false) {
-      const toast = document.getElementById('toast');
+      const toast = document.getElementById('hudToast');
       toast.innerText = msg;
-      toast.style.borderColor = isError ? 'var(--danger)' : 'var(--accent)';
+      toast.style.borderColor = isError ? 'var(--crimson)' : 'var(--cyan)';
       toast.style.display = 'block';
       setTimeout(() => { toast.style.display = 'none'; }, 3500);
     }
@@ -765,7 +923,7 @@
 
     function setPlatformFilter(plat) {
       state.platformFilter = plat;
-      document.querySelectorAll('.filter-bar .status-filter-pills:nth-child(2) button').forEach(b => {
+      document.querySelectorAll('.filter-group .seg-pills:nth-child(2) button').forEach(b => {
         b.classList.toggle('active', b.innerText.toLowerCase() === plat);
       });
       renderContent();
@@ -773,31 +931,31 @@
 
     function setRunStatusFilter(status) {
       state.runStatusFilter = status;
-      document.querySelectorAll('#pipelineStatusFilters button').forEach(b => {
+      document.querySelectorAll('#pipelineFilters button').forEach(b => {
         b.classList.toggle('active', b.innerText.toLowerCase() === status);
       });
       renderContent();
     }
 
     function filterByMetric(filterType) {
-      document.querySelectorAll('.metric-card').forEach(c => c.classList.remove('active-filter'));
+      document.querySelectorAll('.telemetry-card').forEach(c => c.classList.remove('active-telemetry'));
       if (filterType === 'active') {
-        document.getElementById('cardActive').classList.add('active-filter');
+        document.getElementById('cardActive').classList.add('active-telemetry');
         setTab('pipelines');
         setRunStatusFilter('active');
       } else if (filterType === 'failed') {
-        document.getElementById('cardFailed').classList.add('active-filter');
+        document.getElementById('cardFailed').classList.add('active-telemetry');
         setTab('pipelines');
         setRunStatusFilter('failed');
       } else {
-        document.getElementById('cardAll').classList.add('active-filter');
+        document.getElementById('cardAll').classList.add('active-telemetry');
         setTab('repos');
       }
     }
 
     async function refreshDashboard() {
       const btn = document.getElementById('refreshBtn');
-      btn.classList.add('disabled');
+      btn.innerText = 'SYNCING...';
       try {
         const res = await fetch(`/api/space?id=${encodeURIComponent(state.spaceId)}`);
         if (!res.ok) throw new Error(await res.text());
@@ -805,11 +963,11 @@
         populateSpaceSelector();
         updateMetrics();
         renderContent();
-        showToast(`Loaded ${state.data.total_repos} projects`);
+        showToast(`SYNC COMPLETE: ${state.data.total_repos} PROJECTS`);
       } catch (err) {
-        showToast('Error: ' + err.message, true);
+        showToast('ERR: ' + err.message, true);
       } finally {
-        btn.classList.remove('disabled');
+        btn.innerText = 'SYNC';
       }
     }
 
@@ -818,10 +976,10 @@
       const select = document.getElementById('spaceSelect');
       const currentVal = select.value;
       
-      let html = `<option value="all">🌐 All Spaces (Unified Fleet)</option>`;
+      let html = `<option value="all">ALL SPACES (UNIFIED FLEET)</option>`;
       state.data.available_spaces.forEach(s => {
         const icon = s.platform === 'gitlab' ? '🦊' : '🐙';
-        html += `<option value="${s.id}">${icon} ${s.name} (${s.namespace})</option>`;
+        html += `<option value="${s.id}">${icon} ${s.name.toUpperCase()} (${s.namespace})</option>`;
       });
       select.innerHTML = html;
       select.value = currentVal;
@@ -844,12 +1002,12 @@
         document.getElementById('tabBtnRepos').classList.add('active');
         document.getElementById('reposView').style.display = 'grid';
         document.getElementById('pipelinesView').style.display = 'none';
-        document.getElementById('pipelineStatusFilters').style.display = 'none';
+        document.getElementById('pipelineFilters').style.display = 'none';
       } else {
         document.getElementById('tabBtnPipelines').classList.add('active');
         document.getElementById('reposView').style.display = 'none';
         document.getElementById('pipelinesView').style.display = 'flex';
-        document.getElementById('pipelineStatusFilters').style.display = 'flex';
+        document.getElementById('pipelineFilters').style.display = 'flex';
       }
       renderContent();
     }
@@ -866,7 +1024,7 @@
     function renderRepos(query) {
       const container = document.getElementById('reposView');
       if (!state.data || !state.data.repositories) {
-        container.innerHTML = `<div style="color: var(--text-muted); grid-column: 1/-1;">Loading projects fleet...</div>`;
+        container.innerHTML = `<div style="color: var(--text-muted); grid-column: 1/-1;">INITIALIZING TELEMETRY...</div>`;
         return;
       }
 
@@ -882,57 +1040,59 @@
       );
 
       if (repos.length === 0) {
-        container.innerHTML = `<div style="color: var(--text-muted); grid-column: 1/-1;">No matching projects found.</div>`;
+        container.innerHTML = `<div style="color: var(--text-muted); grid-column: 1/-1; padding: 40px; text-align: center;">NO MATCHING FLEET ASSETS FOUND.</div>`;
         return;
       }
 
       container.innerHTML = repos.map(r => {
         const latestRun = r.workflow_runs && r.workflow_runs.length > 0 ? r.workflow_runs[0] : null;
-        let runStatusPill = '';
+        let runStatusPill = `<span class="status-pill idle">NO RUNS</span>`;
         if (latestRun) {
           const statusClass = latestRun.status === 'in_progress' ? 'in_progress' : (latestRun.conclusion === 'success' ? 'success' : 'failure');
-          const statusLabel = latestRun.status === 'in_progress' ? 'Running' : (latestRun.conclusion || latestRun.status);
-          runStatusPill = `<span class="run-pill ${statusClass}" onclick="inspectRun('${r.space_id}', '${r.name}', ${latestRun.id}, '${r.platform}', '${escapeHtml(latestRun.name)}', '${escapeHtml(latestRun.head_branch)}')">● ${statusLabel}</span>`;
+          const statusLabel = latestRun.status === 'in_progress' ? '● RUNNING' : (latestRun.conclusion === 'success' ? '✓ PASSING' : '✗ FAILED');
+          runStatusPill = `<span class="status-pill ${statusClass}" onclick="inspectRun('${r.space_id}', '${r.name}', ${latestRun.id}, '${r.platform}', '${escapeHtml(latestRun.name)}', '${escapeHtml(latestRun.head_branch)}')">${statusLabel}</span>`;
         }
 
         const platformBadge = r.platform === 'gitlab' 
-          ? `<span class="badge badge-gitlab">🦊 GitLab</span>` 
-          : `<span class="badge badge-github">🐙 GitHub</span>`;
+          ? `<span class="platform-tag platform-gitlab">🦊 GITLAB</span>` 
+          : `<span class="platform-tag platform-github">🐙 GITHUB</span>`;
 
         const commitHtml = r.latest_commit ? `
-          <div class="repo-commit-box">
-            <div class="commit-row-top">
-              <span class="mono">${r.latest_commit.short_sha}</span>
+          <div class="commit-strip">
+            <div class="commit-meta">
+              <span>[${r.latest_commit.short_sha}]</span>
               <span>${r.latest_commit.author_name}</span>
             </div>
-            <div class="commit-msg">${escapeHtml(r.latest_commit.message)}</div>
+            <div class="commit-text">${escapeHtml(r.latest_commit.message)}</div>
           </div>
         ` : '';
 
         return `
-          <div class="repo-card">
-            <div class="repo-header">
-              <a href="${r.html_url}" target="_blank" class="repo-name-link">
+          <div class="repo-module">
+            <div class="module-top">
+              <a href="${r.html_url}" target="_blank" class="repo-anchor">
                 ${escapeHtml(r.name)}
               </a>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                ${platformBadge}
+              </div>
             </div>
 
-            <div class="repo-desc">${escapeHtml(r.description || 'No description provided.')}</div>
+            <div class="repo-summary">${escapeHtml(r.description || 'No project description.')}</div>
 
-            <div class="repo-badges">
-              ${platformBadge}
-              ${r.language ? `<span class="badge badge-lang">${escapeHtml(r.language)}</span>` : ''}
-              ${r.latest_release ? `<span class="badge badge-tag">🏷 ${escapeHtml(r.latest_release.tag_name)}</span>` : ''}
+            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+              ${r.language ? `<span class="telemetry-tag">${escapeHtml(r.language)}</span>` : ''}
+              ${r.latest_release ? `<span class="telemetry-tag" style="border-color: var(--emerald); color: var(--emerald);">TAG: ${escapeHtml(r.latest_release.tag_name)}</span>` : ''}
               ${runStatusPill}
             </div>
 
             ${commitHtml}
 
-            <div class="repo-actions">
-              <span style="font-size: 11px; color: var(--text-muted);">${r.default_branch}</span>
-              <div style="display: flex; gap: 8px;">
-                <button class="btn" onclick="openDispatch('${r.space_id}', '${r.id}', '${r.name}', '${r.platform}')" title="Trigger Pipeline">⚡ Run</button>
-                <a href="${r.html_url}" target="_blank" class="btn">View ↗</a>
+            <div class="module-footer">
+              <span class="telemetry-tag">BRANCH: ${r.default_branch}</span>
+              <div style="display: flex; gap: 6px;">
+                <button class="hud-btn hud-btn-primary" onclick="openDispatch('${r.space_id}', '${r.id}', '${r.name}', '${r.platform}')">⚡ RUN</button>
+                <a href="${r.html_url}" target="_blank" class="hud-btn">SRC ↗</a>
               </div>
             </div>
           </div>
@@ -943,7 +1103,7 @@
     function renderPipelines(query) {
       const container = document.getElementById('pipelinesView');
       if (!state.data || !state.data.recent_runs) {
-        container.innerHTML = `<div style="color: var(--text-muted);">No active runs.</div>`;
+        container.innerHTML = `<div style="color: var(--text-muted);">NO ACTIVE PIPELINE TELEMETRY.</div>`;
         return;
       }
 
@@ -968,7 +1128,7 @@
       );
 
       if (runs.length === 0) {
-        container.innerHTML = `<div style="color: var(--text-muted); padding: 40px; text-align: center;">No matching pipeline runs found.</div>`;
+        container.innerHTML = `<div style="color: var(--text-muted); padding: 40px; text-align: center;">NO TELEMETRY MATCHING CRITERIA.</div>`;
         return;
       }
 
@@ -977,47 +1137,114 @@
         const isFailure = run.conclusion === 'failure' || run.conclusion === 'failed';
         const isInProgress = run.status === 'in_progress' || run.status === 'queued';
         
-        const iconClass = isSuccess ? 'status-success' : (isFailure ? 'status-failure' : 'status-in_progress');
-        const iconSymbol = isSuccess ? '✓' : (isFailure ? '✗' : '●');
-        const platformBadge = run.platform === 'gitlab' ? '🦊 GitLab' : '🐙 GitHub';
+        const symbolColor = isSuccess ? 'var(--emerald)' : (isFailure ? 'var(--crimson)' : 'var(--amber)');
+        const symbolChar = isSuccess ? '✓' : (isFailure ? '✗' : '●');
+        const platformBadge = run.platform === 'gitlab' ? '🦊 GITLAB' : '🐙 GITHUB';
 
         return `
-          <div class="pipeline-row">
-            <div class="pipeline-left">
-              <div class="pipeline-status-icon ${iconClass}">${iconSymbol}</div>
+          <div class="stream-row">
+            <div class="stream-left">
+              <div class="stream-symbol" style="color: ${symbolColor}; border: 1px solid ${symbolColor}; background: rgba(0,0,0,0.3);">
+                ${symbolChar}
+              </div>
               <div>
                 <div style="display: flex; align-items: center; gap: 8px;">
-                  <span style="font-size: 11px; color: var(--text-muted);">${platformBadge}</span>
-                  <strong style="color: var(--text-primary); font-size: 14px;">${escapeHtml(run.repo_name)}</strong>
-                  <span style="color: var(--text-muted); font-size: 12px;">/</span>
-                  <span style="color: var(--text-secondary); font-size: 13px;">${escapeHtml(run.name)}</span>
-                  <span class="mono" style="font-size: 11px; background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 4px;">${run.head_branch}</span>
+                  <span class="telemetry-tag">${platformBadge}</span>
+                  <strong style="color: #ffffff; font-family: 'Chakra Petch';">${escapeHtml(run.repo_name)}</strong>
+                  <span style="color: var(--text-dim);">//</span>
+                  <span style="color: var(--cyan);">${escapeHtml(run.name)}</span>
+                  <span class="telemetry-tag">${run.head_branch}</span>
                 </div>
-                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 3px;">
-                  ${escapeHtml(run.commit_msg || 'No commit message')}
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">
+                  ${escapeHtml(run.commit_msg || 'Direct Execution')}
                 </div>
               </div>
             </div>
 
             <div style="display: flex; align-items: center; gap: 10px;">
-              <span style="font-size: 12px; color: var(--text-muted);">${run.duration_sec ? run.duration_sec + 's' : ''}</span>
-              <button class="btn" onclick="inspectRun('${run.space_id}', '${run.repo_name}', ${run.id}, '${run.platform}', '${escapeHtml(run.name)}', '${escapeHtml(run.head_branch)}')">🔍 Steps</button>
+              <span class="telemetry-tag">${run.duration_sec ? run.duration_sec + 's' : '0s'}</span>
+              <button class="hud-btn" onclick="inspectRun('${run.space_id}', '${run.repo_name}', ${run.id}, '${run.platform}', '${escapeHtml(run.name)}', '${escapeHtml(run.head_branch)}')">STEPS</button>
               ${isInProgress ? `
-                <button class="btn btn-danger" onclick="cancelRun('${run.space_id}', '${run.repo_name}', ${run.id})">Cancel</button>
+                <button class="hud-btn hud-btn-danger" onclick="cancelRun('${run.space_id}', '${run.repo_name}', ${run.id})">CANCEL</button>
               ` : `
-                <button class="btn" onclick="rerun('${run.space_id}', '${run.repo_name}', ${run.id})">↻ Retry</button>
+                <button class="hud-btn" onclick="rerun('${run.space_id}', '${run.repo_name}', ${run.id})">RETRY</button>
               `}
-              <a href="${run.html_url}" target="_blank" class="btn">View ↗</a>
+              <a href="${run.html_url}" target="_blank" class="hud-btn">LOGS ↗</a>
             </div>
           </div>
         `;
       }).join('');
     }
 
+    /* Modal Controls */
+    function openAddSpaceModal() {
+      document.getElementById('addSpaceModal').classList.add('open');
+    }
+
+    function closeAddSpaceModal() {
+      document.getElementById('addSpaceModal').classList.remove('open');
+    }
+
+    function selectPlatformForm(plat) {
+      document.getElementById('addPlat').value = plat;
+      document.getElementById('platChoiceGH').classList.toggle('selected', plat === 'github');
+      document.getElementById('platChoiceGL').classList.toggle('selected', plat === 'gitlab');
+      
+      const baseUrlInput = document.getElementById('addBaseUrl');
+      const subgroupsOption = document.getElementById('subgroupsOption');
+      
+      if (plat === 'gitlab') {
+        baseUrlInput.value = 'https://gitlab.com/api/v4';
+        subgroupsOption.style.display = 'block';
+      } else {
+        baseUrlInput.value = 'https://api.github.com';
+        subgroupsOption.style.display = 'none';
+      }
+    }
+
+    async function submitAddSpace() {
+      const id = document.getElementById('addSpaceId').value.trim();
+      const name = document.getElementById('addSpaceName').value.trim();
+      const platform = document.getElementById('addPlat').value;
+      const namespace = document.getElementById('addNamespace').value.trim();
+      const baseUrl = document.getElementById('addBaseUrl').value.trim();
+      const token = document.getElementById('addToken').value.trim();
+      const subgroups = document.getElementById('addSubgroups').checked;
+
+      if (!id || !namespace) {
+        showToast('ERROR: Space ID and Namespace are required!', true);
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/spaces', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: id,
+            name: name || `${platform.toUpperCase()} (${namespace})`,
+            platform: platform,
+            namespace: namespace,
+            base_url: baseUrl,
+            token: token,
+            include_subgroups: subgroups
+          })
+        });
+
+        if (!res.ok) throw new Error(await res.text());
+        showToast(`SPACE [${id}] CONNECTED!`);
+        closeAddSpaceModal();
+        state.spaceId = id;
+        setTimeout(refreshDashboard, 500);
+      } catch (err) {
+        showToast('CONN ERROR: ' + err.message, true);
+      }
+    }
+
     async function inspectRun(spaceId, repo, runId, platform, name, branch) {
-      document.getElementById('inspectTitle').innerText = `${repo} — ${name}`;
-      document.getElementById('inspectSubtitle').innerText = `Branch: ${branch} | Run #${runId} on ${platform === 'gitlab' ? 'GitLab CI' : 'GitHub Actions'}`;
-      document.getElementById('inspectBody').innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted);">Fetching step-level progress...</div>`;
+      document.getElementById('inspectTitle').innerText = `// ${repo} : ${name}`;
+      document.getElementById('inspectSubtitle').innerText = `REF: ${branch} | RUN ID: #${runId} [${platform === 'gitlab' ? 'GITLAB CI' : 'GITHUB ACTIONS'}]`;
+      document.getElementById('inspectBody').innerHTML = `<div style="text-align: center; padding: 30px; color: var(--cyan);">PULLING STEP TELEMETRY...</div>`;
       document.getElementById('inspectorModal').classList.add('open');
 
       try {
@@ -1026,14 +1253,14 @@
         const jobs = await res.json();
         renderJobSteps(jobs);
       } catch (err) {
-        document.getElementById('inspectBody').innerHTML = `<div style="color: var(--danger); padding: 20px;">Failed to load step details: ${err.message}</div>`;
+        document.getElementById('inspectBody').innerHTML = `<div style="color: var(--crimson); padding: 20px;">TELEMETRY FAULT: ${err.message}</div>`;
       }
     }
 
     function renderJobSteps(jobs) {
       const container = document.getElementById('inspectBody');
       if (!jobs || jobs.length === 0) {
-        container.innerHTML = `<div style="color: var(--text-muted); padding: 20px;">No job or step details available for this run.</div>`;
+        container.innerHTML = `<div style="color: var(--text-muted); padding: 20px;">NO DETAILED STEP LOGS FOUND.</div>`;
         return;
       }
 
@@ -1043,43 +1270,41 @@
       const jobsHtml = jobs.map(job => {
         const isSuccess = job.conclusion === 'success';
         const isFailure = job.conclusion === 'failure';
-        const isInProgress = job.status === 'in_progress';
-        const statusBadgeClass = isSuccess ? 'success' : (isFailure ? 'failure' : 'in_progress');
+        const statusColor = isSuccess ? 'var(--emerald)' : (isFailure ? 'var(--crimson)' : 'var(--amber)');
 
         const stepsHtml = (job.steps || []).map(step => {
           totalSteps++;
-          const stepDone = step.status === 'completed';
-          if (stepDone) completedSteps++;
+          if (step.status === 'completed') completedSteps++;
 
-          const iconClass = step.conclusion === 'success' ? 'success' : (step.conclusion === 'failure' ? 'failure' : (step.status === 'in_progress' ? 'in_progress' : 'queued'));
           const iconChar = step.conclusion === 'success' ? '✓' : (step.conclusion === 'failure' ? '✗' : (step.status === 'in_progress' ? '●' : '○'));
+          const stepColor = step.conclusion === 'success' ? 'var(--emerald)' : (step.conclusion === 'failure' ? 'var(--crimson)' : 'var(--amber)');
 
           return `
-            <div class="step-item">
-              <div class="step-left">
-                <span class="step-icon ${iconClass}">${iconChar}</span>
-                <span style="font-weight: 500;">${escapeHtml(step.name)}</span>
+            <div class="step-entry">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="color: ${stepColor}; font-weight: bold;">${iconChar}</span>
+                <span>${escapeHtml(step.name)}</span>
               </div>
-              <span style="color: var(--text-muted); font-size: 11px;">#${step.number}</span>
+              <span class="telemetry-tag">STEP #${step.number}</span>
             </div>
           `;
         }).join('');
 
         return `
-          <div class="job-card">
-            <div class="job-header">
-              <span>Job: ${escapeHtml(job.name)}</span>
-              <span class="run-pill ${statusBadgeClass}">${job.status === 'in_progress' ? 'Running' : (job.conclusion || job.status)}</span>
+          <div class="job-block">
+            <div class="job-block-header">
+              <span>JOB: ${escapeHtml(job.name)}</span>
+              <span style="color: ${statusColor};">${job.status === 'in_progress' ? '● RUNNING' : (job.conclusion || job.status).toUpperCase()}</span>
             </div>
-            <div class="steps-list">
-              ${stepsHtml || '<div style="padding: 10px 14px; color: var(--text-muted); font-size: 12px;">No sub-steps reported</div>'}
+            <div>
+              ${stepsHtml || '<div style="padding: 10px; color: var(--text-muted);">No steps recorded</div>'}
             </div>
           </div>
         `;
       }).join('');
 
       container.innerHTML = jobsHtml;
-      document.getElementById('inspectFooterStatus').innerText = `Step Progress: ${completedSteps} / ${totalSteps} Steps Completed`;
+      document.getElementById('inspectFooterStatus').innerText = `STEP EXECUTION: ${completedSteps} / ${totalSteps} COMPLETED`;
     }
 
     function closeInspector() {
@@ -1109,11 +1334,11 @@
           body: JSON.stringify({ space_id: spaceId, repo: repo, ref: ref })
         });
         if (!res.ok) throw new Error(await res.text());
-        showToast(`Pipeline dispatched for ${repo}!`);
+        showToast(`DISPATCH FIRED: ${repo}`);
         closeModal();
         setTimeout(refreshDashboard, 2000);
       } catch (err) {
-        showToast('Dispatch failed: ' + err.message, true);
+        showToast('TRIGGER FAULT: ' + err.message, true);
       }
     }
 
@@ -1125,10 +1350,10 @@
           body: JSON.stringify({ space_id: spaceId, repo: repo, run_id: runId })
         });
         if (!res.ok) throw new Error(await res.text());
-        showToast(`Triggered retry for ${repo}!`);
+        showToast(`RETRY SENT: ${repo}`);
         setTimeout(refreshDashboard, 2000);
       } catch (err) {
-        showToast('Retry failed: ' + err.message, true);
+        showToast('RETRY FAULT: ' + err.message, true);
       }
     }
 
@@ -1140,10 +1365,10 @@
           body: JSON.stringify({ space_id: spaceId, repo: repo, run_id: runId })
         });
         if (!res.ok) throw new Error(await res.text());
-        showToast(`Cancelled pipeline for ${repo}!`);
+        showToast(`CANCEL SENT: ${repo}`);
         setTimeout(refreshDashboard, 2000);
       } catch (err) {
-        showToast('Cancel failed: ' + err.message, true);
+        showToast('CANCEL FAULT: ' + err.message, true);
       }
     }
 

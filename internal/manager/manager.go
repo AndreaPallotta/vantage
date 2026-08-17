@@ -43,6 +43,32 @@ func (m *Manager) initProviders() {
 	}
 }
 
+// AddSpace registers a new space provider dynamically.
+func (m *Manager) AddSpace(sc models.SpaceConfig) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	// Update config spaces
+	replaced := false
+	for i, s := range m.cfg.Spaces {
+		if s.ID == sc.ID {
+			m.cfg.Spaces[i] = sc
+			replaced = true
+			break
+		}
+	}
+	if !replaced {
+		m.cfg.Spaces = append(m.cfg.Spaces, sc)
+	}
+
+	token := config.ResolveToken(sc)
+	if sc.Platform == models.PlatformGitLab {
+		m.providers[sc.ID] = provider.NewGitLabProvider(sc, token)
+	} else {
+		m.providers[sc.ID] = provider.NewGitHubProvider(sc, token)
+	}
+}
+
 // ListSpaces returns all configured spaces.
 func (m *Manager) ListSpaces() []models.SpaceInfo {
 	m.mu.RLock()
