@@ -79,7 +79,7 @@ var addSpaceCmd = &cobra.Command{
 			return fmt.Errorf("failed to save config: %w", err)
 		}
 
-		color.Green("✓ Successfully configured space %s [%s: %s]!", flagAddID, plat, flagAddNamespace)
+		color.Green("Successfully configured space %s [%s: %s].", flagAddID, plat, flagAddNamespace)
 		fmt.Printf("View dashboard with: vantage --space %s\n", flagAddID)
 		return nil
 	},

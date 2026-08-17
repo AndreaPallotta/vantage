@@ -1,21 +1,21 @@
 # Vantage
 
-**Centralized GitHub Space Mission Control & Pipeline Cockpit**
+**Centralized Multi-Platform (GitHub & GitLab) Pipeline Dashboard**
 
-Vantage provides unified, high-ground visibility and control over all repositories, commit vitality, release tags, and CI/CD workflow runs across your entire GitHub space (user account or organization).
+Vantage provides unified visibility and control over repositories, commit vitality, release tags, and CI/CD workflow runs across all your GitHub and GitLab spaces.
 
 ---
 
 ## Key Capabilities
 
-- **Fleet Overview**: Discovers and tracks all repositories in your space with real-time status on default branches, commit vitality, stars, forks, and tags.
-- **Unified Pipeline Feed**: Aggregates GitHub Actions workflow runs across all repos in a single real-time stream.
-- **Workflow Dispatcher**: Trigger any `workflow_dispatch` pipeline on demand with branch selection and custom inputs.
-- **Run Management**: Rerun failed pipelines or cancel in-progress runs directly from the terminal or web dashboard.
-- **Zero Configuration**: Automatically resolves credentials via `GITHUB_TOKEN`, `GH_TOKEN`, or local `gh auth token`.
-- **Dual Formats**:
-  - **Embedded Web Dashboard**: Modern dark-mode interface with live metrics and one-click dispatch at `http://localhost:8080`.
-  - **Terminal Cockpit**: Fast CLI commands (`vantage status`, `vantage runs`, `vantage trigger`) for scriptable operations.
+- **Fleet Overview**: Discovers and tracks repositories across multiple spaces with real-time status on default branches, commit vitality, forks, and tags.
+- **Unified Pipeline Telemetry**: Aggregates GitHub Actions and GitLab CI pipeline runs in a single real-time stream.
+- **Multi-Platform Support**: Connects to GitHub, public GitLab.com, and self-hosted GitLab instances with token authentication.
+- **Multi-Namespace Switching**: Switch between individual groups/orgs or monitor all configured spaces in a unified fleet view.
+- **Pipeline Orchestration**: Trigger any workflow on demand, retry failed runs, or cancel active executions directly from the UI or CLI.
+- **Dual Interfaces**:
+  - **Embedded Web UI**: Cyber-Telemetry dashboard with live step inspector at `http://localhost:8080`.
+  - **Terminal Commands**: Fast CLI commands (`vantage status`, `vantage runs`, `vantage spaces`, `vantage trigger`).
 
 ---
 
@@ -31,24 +31,34 @@ Or download pre-compiled binaries for Windows, Linux, and macOS from the [Releas
 
 ## Quick Start
 
-### Launch Web Cockpit
+### Launch Web Interface
 ```bash
 vantage
 ```
-Opens the interactive dark-mode dashboard at `http://localhost:8080`.
+Opens the interactive telemetry dashboard at `http://localhost:8080`.
 
 ### CLI Fleet Summary
 ```bash
-# Print fleet status table
+# Print fleet status table across all spaces
 vantage status
 
-# Monitor a specific space/organization
+# Monitor a specific space
 vantage status --space AndreaPallotta
+```
+
+### List Configured Spaces
+```bash
+vantage spaces
+```
+
+### Add a New Space
+```bash
+vantage add-space --id gitlab-team --name "Team Services" --platform gitlab --url https://gitlab.com --namespace my-group --token $GITLAB_TOKEN
 ```
 
 ### Stream Pipeline Runs
 ```bash
-# View recent workflow runs across all repos in space
+# View recent workflow runs across all repos
 vantage runs
 
 # Filter runs for a specific repository
@@ -69,7 +79,7 @@ Vantage reads configuration from `~/.vantage/config.json` or environment variabl
 
 | Option | Env Var | Flag | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| `space` | `VANTAGE_SPACE` | `--space`, `-s` | Authenticated user | GitHub user or organization |
+| `space` | `VANTAGE_SPACE` | `--space`, `-s` | `all` | Space ID to monitor or `all` for unified fleet |
 | `token` | `GITHUB_TOKEN` | `--token`, `-t` | `gh auth token` | GitHub Personal Access Token |
 | `port` | `VANTAGE_PORT` | `--port`, `-p` | `8080` | Port for the web dashboard |
 | `auto_open` | `VANTAGE_AUTO_OPEN` | `--no-open` | `true` | Open browser on startup |

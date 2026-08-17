@@ -30,7 +30,7 @@ var statusCmd = &cobra.Command{
 
 		mgr := manager.New(cfg)
 
-		fmt.Printf("🔍 Scanning space: %s...\n\n", color.CyanString(spaceID))
+		fmt.Printf("Scanning space: %s...\n\n", color.CyanString(spaceID))
 
 		overview, err := mgr.GetOverview(context.Background(), spaceID, cfg.IncludeForks, cfg.IncludeArchived)
 		if err != nil {
@@ -76,13 +76,13 @@ var statusCmd = &cobra.Command{
 			if len(r.WorkflowRuns) > 0 {
 				lastRun := r.WorkflowRuns[0]
 				if lastRun.Status == "in_progress" {
-					ciStr = color.YellowString("● running")
+					ciStr = color.YellowString("running")
 				} else if lastRun.Status == "queued" {
-					ciStr = color.YellowString("● queued")
+					ciStr = color.YellowString("queued")
 				} else if lastRun.Conclusion == "success" {
-					ciStr = color.GreenString("✓ passing")
+					ciStr = color.GreenString("passing")
 				} else if lastRun.Conclusion == "failure" || lastRun.Conclusion == "failed" {
-					ciStr = color.RedString("✗ failed")
+					ciStr = color.RedString("failed")
 				} else {
 					ciStr = lastRun.Conclusion
 				}

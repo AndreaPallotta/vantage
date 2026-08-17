@@ -34,14 +34,14 @@ var runsCmd = &cobra.Command{
 
 		if len(args) > 0 {
 			repo := args[0]
-			fmt.Printf("🔍 Fetching runs for %s...\n\n", repo)
+			fmt.Printf("Fetching runs for %s...\n\n", repo)
 			if spaceID != "all" {
 				if prov, err := mgr.GetProvider(spaceID); err == nil {
 					runs, _ = prov.ListPipelines(context.Background(), repo, 25)
 				}
 			}
 		} else {
-			fmt.Printf("🔍 Fetching space pipeline runs for: %s...\n\n", color.CyanString(spaceID))
+			fmt.Printf("Fetching space pipeline runs for: %s...\n\n", color.CyanString(spaceID))
 			overview, err := mgr.GetOverview(context.Background(), spaceID, cfg.IncludeForks, cfg.IncludeArchived)
 			if err != nil {
 				return err
@@ -67,14 +67,14 @@ var runsCmd = &cobra.Command{
 			statusStr := r.Status
 			if r.Status == "completed" {
 				if r.Conclusion == "success" {
-					statusStr = color.GreenString("✓ success")
+					statusStr = color.GreenString("success")
 				} else if r.Conclusion == "failure" || r.Conclusion == "failed" {
-					statusStr = color.RedString("✗ failure")
+					statusStr = color.RedString("failure")
 				} else {
 					statusStr = r.Conclusion
 				}
 			} else {
-				statusStr = color.YellowString("● " + r.Status)
+				statusStr = color.YellowString(r.Status)
 			}
 
 			durStr := fmt.Sprintf("%ds", r.DurationSec)

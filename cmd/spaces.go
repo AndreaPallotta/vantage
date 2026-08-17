@@ -29,9 +29,9 @@ var spacesCmd = &cobra.Command{
 
 		for _, s := range cfg.Spaces {
 			tokenResolved := config.ResolveToken(s)
-			tokenStatus := color.GreenString("✓ configured")
+			tokenStatus := color.GreenString("configured")
 			if tokenResolved == "" {
-				tokenStatus = color.YellowString("! missing token")
+				tokenStatus = color.YellowString("missing token")
 			}
 
 			platStr := color.MagentaString("GitHub")

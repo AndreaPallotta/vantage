@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VANTAGE // Multi-Space Mission Control & CI/CD Telemetry</title>
+  <title>VANTAGE // Multi-Space CI/CD Telemetry</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,500;0,600;0,700;1,600&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -681,7 +681,7 @@
     <div class="brand-section">
       <div class="brand-logo">V</div>
       <div class="brand-title">
-        VANTAGE <span>//</span> MISSION CONTROL
+        VANTAGE
       </div>
       <div class="hud-badge-container">
         <span class="telemetry-tag">[SYS: NOMINAL]</span>
@@ -796,17 +796,17 @@
     <div class="hud-modal">
       <div class="modal-head">
         <h3>// CONNECT NEW SPACE OR NAMESPACE</h3>
-        <button class="hud-btn" onclick="closeAddSpaceModal()">✕</button>
+        <button class="hud-btn" onclick="closeAddSpaceModal()">X</button>
       </div>
       <div class="modal-content">
         <div class="form-field">
           <label>Hosting Platform</label>
           <div class="platform-selector-group">
             <div class="platform-choice selected" id="platChoiceGH" onclick="selectPlatformForm('github')">
-              <span>🐙</span> <strong>GitHub</strong> (User or Org)
+              <strong>[GH] GitHub</strong> (User or Org)
             </div>
             <div class="platform-choice" id="platChoiceGL" onclick="selectPlatformForm('gitlab')">
-              <span>🦊</span> <strong>GitLab</strong> (Group / Self-Hosted)
+              <strong>[GL] GitLab</strong> (Group / Self-Hosted)
             </div>
           </div>
           <input type="hidden" id="addPlat" value="github" />
@@ -856,7 +856,7 @@
     <div class="hud-modal">
       <div class="modal-head">
         <h3>// TRIGGER WORKFLOW DISPATCH</h3>
-        <button class="hud-btn" onclick="closeModal()">✕</button>
+        <button class="hud-btn" onclick="closeModal()">X</button>
       </div>
       <div class="modal-content">
         <div class="form-field">
@@ -885,7 +885,7 @@
           <h3 id="inspectTitle">// PIPELINE INSPECTION</h3>
           <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;" id="inspectSubtitle"></div>
         </div>
-        <button class="hud-btn" onclick="closeInspector()">✕</button>
+        <button class="hud-btn" onclick="closeInspector()">X</button>
       </div>
       <div class="modal-content" id="inspectBody">
         <div style="text-align: center; padding: 30px; color: var(--text-muted);">FETCHING STEP TELEMETRY...</div>
@@ -978,7 +978,7 @@
       
       let html = `<option value="all">ALL SPACES (UNIFIED FLEET)</option>`;
       state.data.available_spaces.forEach(s => {
-        const icon = s.platform === 'gitlab' ? '🦊' : '🐙';
+        const icon = s.platform === 'gitlab' ? '[GL]' : '[GH]';
         html += `<option value="${s.id}">${icon} ${s.name.toUpperCase()} (${s.namespace})</option>`;
       });
       select.innerHTML = html;
@@ -1049,13 +1049,13 @@
         let runStatusPill = `<span class="status-pill idle">NO RUNS</span>`;
         if (latestRun) {
           const statusClass = latestRun.status === 'in_progress' ? 'in_progress' : (latestRun.conclusion === 'success' ? 'success' : 'failure');
-          const statusLabel = latestRun.status === 'in_progress' ? '● RUNNING' : (latestRun.conclusion === 'success' ? '✓ PASSING' : '✗ FAILED');
+          const statusLabel = latestRun.status === 'in_progress' ? 'RUNNING' : (latestRun.conclusion === 'success' ? 'PASSING' : 'FAILED');
           runStatusPill = `<span class="status-pill ${statusClass}" onclick="inspectRun('${r.space_id}', '${r.name}', ${latestRun.id}, '${r.platform}', '${escapeHtml(latestRun.name)}', '${escapeHtml(latestRun.head_branch)}')">${statusLabel}</span>`;
         }
 
         const platformBadge = r.platform === 'gitlab' 
-          ? `<span class="platform-tag platform-gitlab">🦊 GITLAB</span>` 
-          : `<span class="platform-tag platform-github">🐙 GITHUB</span>`;
+          ? `<span class="platform-tag platform-gitlab">GITLAB</span>` 
+          : `<span class="platform-tag platform-github">GITHUB</span>`;
 
         const commitHtml = r.latest_commit ? `
           <div class="commit-strip">
@@ -1091,8 +1091,8 @@
             <div class="module-footer">
               <span class="telemetry-tag">BRANCH: ${r.default_branch}</span>
               <div style="display: flex; gap: 6px;">
-                <button class="hud-btn hud-btn-primary" onclick="openDispatch('${r.space_id}', '${r.id}', '${r.name}', '${r.platform}')">⚡ RUN</button>
-                <a href="${r.html_url}" target="_blank" class="hud-btn">SRC ↗</a>
+                <button class="hud-btn hud-btn-primary" onclick="openDispatch('${r.space_id}', '${r.id}', '${r.name}', '${r.platform}')">RUN</button>
+                <a href="${r.html_url}" target="_blank" class="hud-btn">SRC</a>
               </div>
             </div>
           </div>
@@ -1138,13 +1138,13 @@
         const isInProgress = run.status === 'in_progress' || run.status === 'queued';
         
         const symbolColor = isSuccess ? 'var(--emerald)' : (isFailure ? 'var(--crimson)' : 'var(--amber)');
-        const symbolChar = isSuccess ? '✓' : (isFailure ? '✗' : '●');
-        const platformBadge = run.platform === 'gitlab' ? '🦊 GITLAB' : '🐙 GITHUB';
+        const symbolChar = isSuccess ? 'PASS' : (isFailure ? 'FAIL' : 'RUN');
+        const platformBadge = run.platform === 'gitlab' ? 'GITLAB' : 'GITHUB';
 
         return `
           <div class="stream-row">
             <div class="stream-left">
-              <div class="stream-symbol" style="color: ${symbolColor}; border: 1px solid ${symbolColor}; background: rgba(0,0,0,0.3);">
+              <div class="stream-symbol" style="color: ${symbolColor}; border: 1px solid ${symbolColor}; background: rgba(0,0,0,0.3); font-size: 10px; padding: 2px 4px; width: auto; height: auto;">
                 ${symbolChar}
               </div>
               <div>
@@ -1169,7 +1169,7 @@
               ` : `
                 <button class="hud-btn" onclick="rerun('${run.space_id}', '${run.repo_name}', ${run.id})">RETRY</button>
               `}
-              <a href="${run.html_url}" target="_blank" class="hud-btn">LOGS ↗</a>
+              <a href="${run.html_url}" target="_blank" class="hud-btn">LOGS</a>
             </div>
           </div>
         `;
@@ -1242,7 +1242,7 @@
     }
 
     async function inspectRun(spaceId, repo, runId, platform, name, branch) {
-      document.getElementById('inspectTitle').innerText = `// ${repo} : ${name}`;
+      document.getElementById('inspectTitle').innerText = `// ${repo} - ${name}`;
       document.getElementById('inspectSubtitle').innerText = `REF: ${branch} | RUN ID: #${runId} [${platform === 'gitlab' ? 'GITLAB CI' : 'GITHUB ACTIONS'}]`;
       document.getElementById('inspectBody').innerHTML = `<div style="text-align: center; padding: 30px; color: var(--cyan);">PULLING STEP TELEMETRY...</div>`;
       document.getElementById('inspectorModal').classList.add('open');
@@ -1276,13 +1276,13 @@
           totalSteps++;
           if (step.status === 'completed') completedSteps++;
 
-          const iconChar = step.conclusion === 'success' ? '✓' : (step.conclusion === 'failure' ? '✗' : (step.status === 'in_progress' ? '●' : '○'));
+          const iconChar = step.conclusion === 'success' ? '[OK]' : (step.conclusion === 'failure' ? '[ERR]' : (step.status === 'in_progress' ? '[RUN]' : '[QUE]'));
           const stepColor = step.conclusion === 'success' ? 'var(--emerald)' : (step.conclusion === 'failure' ? 'var(--crimson)' : 'var(--amber)');
 
           return `
             <div class="step-entry">
               <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="color: ${stepColor}; font-weight: bold;">${iconChar}</span>
+                <span style="color: ${stepColor}; font-weight: bold; font-size: 10px;">${iconChar}</span>
                 <span>${escapeHtml(step.name)}</span>
               </div>
               <span class="telemetry-tag">STEP #${step.number}</span>
@@ -1294,7 +1294,7 @@
           <div class="job-block">
             <div class="job-block-header">
               <span>JOB: ${escapeHtml(job.name)}</span>
-              <span style="color: ${statusColor};">${job.status === 'in_progress' ? '● RUNNING' : (job.conclusion || job.status).toUpperCase()}</span>
+              <span style="color: ${statusColor};">${job.status === 'in_progress' ? 'RUNNING' : (job.conclusion || job.status).toUpperCase()}</span>
             </div>
             <div>
               ${stepsHtml || '<div style="padding: 10px; color: var(--text-muted);">No steps recorded</div>'}

@@ -21,8 +21,8 @@ var (
 
 var rootCmd = &cobra.Command{
 	Use:   "vantage",
-	Short: "Centralized Multi-Platform (GitHub & GitLab) Mission Control Dashboard",
-	Long: `Vantage is a unified mission control cockpit for monitoring repositories,
+	Short: "Centralized Multi-Platform (GitHub & GitLab) Pipeline Dashboard",
+	Long: `Vantage is a unified dashboard for monitoring repositories,
 commit vitality, release tags, and CI/CD pipelines across all your GitHub and GitLab spaces.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg, err := config.Load()

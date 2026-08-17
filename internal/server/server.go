@@ -265,7 +265,7 @@ func (s *Server) handleCancel(w http.ResponseWriter, r *http.Request) {
 // Start runs the HTTP server.
 func (s *Server) Start() error {
 	url := fmt.Sprintf("http://localhost:%d", s.cfg.Port)
-	fmt.Printf("\n🚀 Vantage Mission Control running at: %s\n\n", url)
+	fmt.Printf("\nVantage running at: %s\n\n", url)
 
 	if s.cfg.AutoOpen {
 		go func() {

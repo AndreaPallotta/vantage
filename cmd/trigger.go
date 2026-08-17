@@ -51,7 +51,7 @@ var triggerCmd = &cobra.Command{
 			ref = "main"
 		}
 
-		fmt.Printf("🚀 Triggering %s pipeline for %s on ref %s [%s: %s]...\n",
+		fmt.Printf("Triggering %s pipeline for %s on ref %s [%s: %s]...\n",
 			color.CyanString(workflow),
 			color.YellowString(repo),
 			color.GreenString(ref),
@@ -63,7 +63,7 @@ var triggerCmd = &cobra.Command{
 			return fmt.Errorf("failed to trigger pipeline: %w", err)
 		}
 
-		color.Green("✓ Successfully triggered pipeline! Check status with: vantage runs %s\n", repo)
+		color.Green("Successfully triggered pipeline. Check status with: vantage runs %s\n", repo)
 		return nil
 	},
 }
