@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vantage | GitHub Fleet & Pipeline Cockpit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #090d16;
+      --bg-surface: #0f172a;
+      --bg-card: #131d35;
+      --bg-card-hover: #182442;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-focus: #38bdf8;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.25);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --success: #22c55e;
+      --success-glow: rgba(34, 197, 94, 0.2);
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --danger-glow: rgba(239, 68, 68, 0.2);
+      --info: #818cf8;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+
+    code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* Top Navigation Header */
+    header {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 12px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #090d16;
+      font-size: 16px;
+      box-shadow: 0 0 16px var(--accent-glow);
+    }
+    .brand-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 12px;
+      font-weight: 600;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .space-selector {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+    }
+    .space-selector input {
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+      width: 140px;
+      outline: none;
+    }
+
+    .btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+    .btn:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent);
+    }
+    .btn-primary {
+      background: #0284c7;
+      border-color: #38bdf8;
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      background: #0369a1;
+    }
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+    }
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.3);
+    }
+
+    /* Main Container */
+    main {
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 24px 28px;
+      flex: 1;
+    }
+
+    /* Metric Cards Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: transform 0.15s ease;
+    }
+    .metric-card:hover {
+      transform: translateY(-2px);
+    }
+    .metric-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .metric-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: -1px;
+    }
+    .metric-value.success { color: var(--success); }
+    .metric-value.danger { color: var(--danger); }
+    .metric-value.accent { color: var(--accent); }
+
+    /* Tabs Bar */
+    .tabs-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 20px;
+      gap: 16px;
+    }
+    .tabs {
+      display: flex;
+      gap: 8px;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 10px 16px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .tab-btn:hover {
+      color: var(--text-primary);
+    }
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .search-input {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-family: inherit;
+      width: 260px;
+      outline: none;
+    }
+    .search-input:focus {
+      border-color: var(--accent);
+    }
+
+    /* Repositories Grid */
+    .repos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 18px;
+    }
+    .repo-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .repo-card:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(56, 189, 248, 0.4);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+    .repo-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .repo-name-link {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .repo-name-link:hover {
+      text-decoration: underline;
+    }
+    .repo-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      min-height: 36px;
+    }
+
+    .repo-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-secondary);
+    }
+    .badge-tag {
+      background: rgba(34, 197, 94, 0.12);
+      color: var(--success);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    .badge-lang {
+      background: rgba(129, 140, 248, 0.12);
+      color: var(--info);
+      border: 1px solid rgba(129, 140, 248, 0.3);
+    }
+
+    .repo-commit-box {
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .commit-row-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text-muted);
+    }
+    .commit-msg {
+      color: var(--text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    .repo-runs-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .run-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .run-pill.success { background: rgba(34, 197, 94, 0.15); color: #86efac; }
+    .run-pill.failure { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
+    .run-pill.in_progress { background: rgba(245, 158, 11, 0.15); color: #fde68a; }
+
+    .repo-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    /* Pipelines List */
+    .pipelines-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .pipeline-row {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      transition: all 0.15s;
+    }
+    .pipeline-row:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+    .pipeline-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex: 1;
+    }
+    .pipeline-status-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+    .status-success { background: var(--success-glow); color: var(--success); }
+    .status-failure { background: var(--danger-glow); color: var(--danger); }
+    .status-in_progress { background: rgba(245, 158, 11, 0.2); color: var(--warning); animation: pulse 1.5s infinite; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      width: 90%;
+      max-width: 600px;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-group label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .form-input, .form-select {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+    }
+    .form-input:focus, .form-select:focus {
+      border-color: var(--accent);
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #0f172a;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 12px 20px;
+      border-radius: var(--radius-md);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      font-size: 13px;
+      font-weight: 500;
+      z-index: 2000;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-logo">V</div>
+      <div class="brand-title">
+        Vantage
+        <span class="brand-badge">Mission Control</span>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="space-selector">
+        <span style="font-size: 12px; color: var(--text-muted);">Space:</span>
+        <input type="text" id="spaceInput" value="AndreaPallotta" placeholder="GitHub user or org..." />
+        <button class="btn" onclick="loadSpace()" style="padding: 2px 8px; font-size: 11px;">Load</button>
+      </div>
+
+      <button class="btn" onclick="refreshDashboard()" id="refreshBtn">
+        <span id="refreshIcon">↻</span> Refresh
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Metric Overview -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <span class="metric-label">Repositories</span>
+        <span class="metric-value accent" id="metricRepos">--</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Active Pipelines</span>
+        <span class="metric-value" id="metricActive">--</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Failed Pipelines</span>
+        <span class="metric-value danger" id="metricFailed">--</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">CI Success Rate</span>
+        <span class="metric-value success" id="metricSuccessRate">--%</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Total Stars</span>
+        <span class="metric-value" id="metricStars">--</span>
+      </div>
+    </div>
+
+    <!-- Tabs & Filter Bar -->
+    <div class="tabs-bar">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="setTab('repos')">Repositories (<span id="tabRepoCount">0</span>)</button>
+        <button class="tab-btn" onclick="setTab('pipelines')">Live Pipelines Feed (<span id="tabRunsCount">0</span>)</button>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" class="search-input" id="searchFilter" placeholder="Filter repos & pipelines..." oninput="renderContent()" />
+      </div>
+    </div>
+
+    <!-- Repositories Grid Container -->
+    <div id="reposView" class="repos-grid"></div>
+
+    <!-- Pipelines List Container -->
+    <div id="pipelinesView" class="pipelines-list" style="display: none;"></div>
+  </main>
+
+  <!-- Trigger Modal -->
+  <div class="modal-overlay" id="dispatchModal">
+    <div class="modal">
+      <div class="modal-title">Trigger Workflow Run</div>
+      <div class="form-group">
+        <label>Repository</label>
+        <input type="text" class="form-input" id="modalRepo" readonly />
+      </div>
+      <div class="form-group">
+        <label>Workflow</label>
+        <select class="form-select" id="modalWorkflow"></select>
+      </div>
+      <div class="form-group">
+        <label>Branch / Ref</label>
+        <input type="text" class="form-input" id="modalRef" value="main" />
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 12px;">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="submitDispatch()">Dispatch Workflow</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+    let state = {
+      space: 'AndreaPallotta',
+      activeTab: 'repos',
+      data: null,
+      filter: ''
+    };
+
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.style.borderColor = isError ? 'var(--danger)' : 'var(--accent)';
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 3500);
+    }
+
+    async function loadSpace() {
+      const space = document.getElementById('spaceInput').value.trim();
+      if (!space) return;
+      state.space = space;
+      await refreshDashboard();
+    }
+
+    async function refreshDashboard() {
+      const btn = document.getElementById('refreshBtn');
+      btn.classList.add('disabled');
+      try {
+        const res = await fetch(`/api/space?owner=${encodeURIComponent(state.space)}`);
+        if (!res.ok) throw new Error(await res.text());
+        state.data = await res.json();
+        updateMetrics();
+        renderContent();
+        showToast(`Loaded ${state.data.total_repos} repositories for ${state.space}`);
+      } catch (err) {
+        showToast('Error: ' + err.message, true);
+      } finally {
+        btn.classList.remove('disabled');
+      }
+    }
+
+    function updateMetrics() {
+      if (!state.data) return;
+      document.getElementById('metricRepos').innerText = state.data.total_repos;
+      document.getElementById('metricActive').innerText = state.data.active_pipelines;
+      document.getElementById('metricFailed').innerText = state.data.failed_pipelines;
+      document.getElementById('metricSuccessRate').innerText = `${state.data.success_rate.toFixed(0)}%`;
+      document.getElementById('metricStars').innerText = state.data.total_stars;
+      document.getElementById('tabRepoCount').innerText = state.data.total_repos;
+      document.getElementById('tabRunsCount').innerText = state.data.recent_runs ? state.data.recent_runs.length : 0;
+    }
+
+    function setTab(tab) {
+      state.activeTab = tab;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+
+      document.getElementById('reposView').style.display = tab === 'repos' ? 'grid' : 'none';
+      document.getElementById('pipelinesView').style.display = tab === 'pipelines' ? 'flex' : 'none';
+      renderContent();
+    }
+
+    function renderContent() {
+      const query = document.getElementById('searchFilter').value.toLowerCase().trim();
+      if (state.activeTab === 'repos') {
+        renderRepos(query);
+      } else {
+        renderPipelines(query);
+      }
+    }
+
+    function renderRepos(query) {
+      const container = document.getElementById('reposView');
+      if (!state.data || !state.data.repositories) {
+        container.innerHTML = `<div style="color: var(--text-muted); grid-column: 1/-1;">Loading space fleet...</div>`;
+        return;
+      }
+
+      const repos = state.data.repositories.filter(r => 
+        r.name.toLowerCase().includes(query) || 
+        (r.description && r.description.toLowerCase().includes(query)) ||
+        (r.language && r.language.toLowerCase().includes(query))
+      );
+
+      if (repos.length === 0) {
+        container.innerHTML = `<div style="color: var(--text-muted); grid-column: 1/-1;">No matching repositories found.</div>`;
+        return;
+      }
+
+      container.innerHTML = repos.map(r => {
+        const latestRun = r.workflow_runs && r.workflow_runs.length > 0 ? r.workflow_runs[0] : null;
+        let runStatusPill = '';
+        if (latestRun) {
+          const statusClass = latestRun.status === 'in_progress' ? 'in_progress' : (latestRun.conclusion === 'success' ? 'success' : 'failure');
+          const statusLabel = latestRun.status === 'in_progress' ? 'Running' : (latestRun.conclusion || latestRun.status);
+          runStatusPill = `<span class="run-pill ${statusClass}">● ${statusLabel}</span>`;
+        }
+
+        const commitHtml = r.latest_commit ? `
+          <div class="repo-commit-box">
+            <div class="commit-row-top">
+              <span class="mono">${r.latest_commit.short_sha}</span>
+              <span>${r.latest_commit.author_name}</span>
+            </div>
+            <div class="commit-msg">${escapeHtml(r.latest_commit.message)}</div>
+          </div>
+        ` : '';
+
+        return `
+          <div class="repo-card">
+            <div class="repo-header">
+              <a href="${r.html_url}" target="_blank" class="repo-name-link">
+                ${escapeHtml(r.name)}
+              </a>
+              <span style="font-size: 12px; color: var(--text-secondary);">★ ${r.stars}</span>
+            </div>
+
+            <div class="repo-desc">${escapeHtml(r.description || 'No description provided.')}</div>
+
+            <div class="repo-badges">
+              ${r.language ? `<span class="badge badge-lang">${escapeHtml(r.language)}</span>` : ''}
+              ${r.latest_release ? `<span class="badge badge-tag">🏷 ${escapeHtml(r.latest_release.tag_name)}</span>` : ''}
+              ${runStatusPill}
+            </div>
+
+            ${commitHtml}
+
+            <div class="repo-actions">
+              <span style="font-size: 11px; color: var(--text-muted);">${r.default_branch}</span>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn" onclick="openDispatch('${r.owner}', '${r.name}')" title="Trigger Workflow">⚡ Dispatch</button>
+                <a href="${r.html_url}/actions" target="_blank" class="btn">Actions ↗</a>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderPipelines(query) {
+      const container = document.getElementById('pipelinesView');
+      if (!state.data || !state.data.recent_runs) {
+        container.innerHTML = `<div style="color: var(--text-muted);">No active runs.</div>`;
+        return;
+      }
+
+      const runs = state.data.recent_runs.filter(r => 
+        r.repo_name.toLowerCase().includes(query) ||
+        r.name.toLowerCase().includes(query) ||
+        (r.commit_msg && r.commit_msg.toLowerCase().includes(query)) ||
+        (r.actor && r.actor.toLowerCase().includes(query))
+      );
+
+      if (runs.length === 0) {
+        container.innerHTML = `<div style="color: var(--text-muted);">No matching pipeline runs.</div>`;
+        return;
+      }
+
+      container.innerHTML = runs.map(run => {
+        const isSuccess = run.conclusion === 'success';
+        const isFailure = run.conclusion === 'failure';
+        const isInProgress = run.status === 'in_progress' || run.status === 'queued';
+        
+        const iconClass = isSuccess ? 'status-success' : (isFailure ? 'status-failure' : 'status-in_progress');
+        const iconSymbol = isSuccess ? '✓' : (isFailure ? '✗' : '●');
+
+        return `
+          <div class="pipeline-row">
+            <div class="pipeline-left">
+              <div class="pipeline-status-icon ${iconClass}">${iconSymbol}</div>
+              <div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <strong style="color: var(--text-primary); font-size: 14px;">${escapeHtml(run.repo_name)}</strong>
+                  <span style="color: var(--text-muted); font-size: 12px;">/</span>
+                  <span style="color: var(--text-secondary); font-size: 13px;">${escapeHtml(run.name)}</span>
+                  <span class="mono" style="font-size: 11px; background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 4px;">${run.head_branch}</span>
+                </div>
+                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 3px;">
+                  ${escapeHtml(run.commit_msg || 'No commit message')}
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 12px; color: var(--text-muted);">${run.duration_sec ? run.duration_sec + 's' : ''}</span>
+              ${isInProgress ? `
+                <button class="btn btn-danger" onclick="cancelRun('${run.repo_owner}', '${run.repo_name}', ${run.id})">Cancel</button>
+              ` : `
+                <button class="btn" onclick="rerun('${run.repo_owner}', '${run.repo_name}', ${run.id})">↻ Rerun</button>
+              `}
+              <a href="${run.html_url}" target="_blank" class="btn">View ↗</a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openDispatch(owner, repo) {
+      document.getElementById('modalRepo').value = `${owner}/${repo}`;
+      const repoObj = state.data.repositories.find(r => r.name === repo);
+      const select = document.getElementById('modalWorkflow');
+      select.innerHTML = '';
+      if (repoObj && repoObj.workflows && repoObj.workflows.length > 0) {
+        repoObj.workflows.forEach(w => {
+          select.innerHTML += `<option value="${w.id}">${w.name} (${w.path})</option>`;
+        });
+      } else {
+        select.innerHTML = `<option value="release.yml">release.yml</option><option value="ci.yml">ci.yml</option>`;
+      }
+      document.getElementById('dispatchModal').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('dispatchModal').classList.remove('open');
+    }
+
+    async function submitDispatch() {
+      const fullRepo = document.getElementById('modalRepo').value;
+      const [owner, repo] = fullRepo.split('/');
+      const workflow = document.getElementById('modalWorkflow').value;
+      const ref = document.getElementById('modalRef').value || 'main';
+
+      try {
+        const res = await fetch(`/api/actions/dispatch`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ owner, repo, workflow, ref })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        showToast(`Workflow dispatched for ${repo}!`);
+        closeModal();
+        setTimeout(refreshDashboard, 2000);
+      } catch (err) {
+        showToast('Dispatch failed: ' + err.message, true);
+      }
+    }
+
+    async function rerun(owner, repo, runId) {
+      try {
+        const res = await fetch(`/api/actions/rerun`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ owner, repo, run_id: runId })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        showToast(`Triggered rerun for ${repo}!`);
+        setTimeout(refreshDashboard, 2000);
+      } catch (err) {
+        showToast('Rerun failed: ' + err.message, true);
+      }
+    }
+
+    async function cancelRun(owner, repo, runId) {
+      try {
+        const res = await fetch(`/api/actions/cancel`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ owner, repo, run_id: runId })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        showToast(`Cancelled run for ${repo}!`);
+        setTimeout(refreshDashboard, 2000);
+      } catch (err) {
+        showToast('Cancel failed: ' + err.message, true);
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    // Initialize Dashboard
+    window.addEventListener('DOMContentLoaded', () => {
+      refreshDashboard();
+      // Auto-refresh interval every 30 seconds
+      setInterval(refreshDashboard, 30000);
+    });
+  </script>
+</body>
+</html>

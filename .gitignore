@@ -1,0 +1,22 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+dist/
+bin/
+vantage
+
+# Test artifacts
+coverage.out
+*.test
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# IDE & Config
+.idea/
+.vscode/
+*.swp
