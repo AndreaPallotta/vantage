@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="vGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f0ff" />
+      <stop offset="100%" stop-color="#00ff9d" />
+    </linearGradient>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d0d14" />
+      <stop offset="100%" stop-color="#070709" />
+    </linearGradient>
+  </defs>
+  <!-- Background Badge with Tech Chamfered Corner -->
+  <polygon points="4,4 60,4 60,48 48,60 4,60" fill="url(#bgGrad)" stroke="#00f0ff" stroke-width="2.5" />
+  
+  <!-- Subtle Grid Accent Lines -->
+  <line x1="4" y1="20" x2="60" y2="20" stroke="rgba(0,240,255,0.15)" stroke-width="1" />
+  <line x1="20" y1="4" x2="20" y2="60" stroke="rgba(0,240,255,0.15)" stroke-width="1" />
+  <line x1="44" y1="4" x2="44" y2="60" stroke="rgba(0,240,255,0.15)" stroke-width="1" />
+
+  <!-- Bold V Chevron Logo -->
+  <path d="M16 16 L25 16 L32 38 L39 16 L48 16 L37 48 L27 48 Z" fill="url(#vGrad)" />
+  
+  <!-- Luminous Core Node -->
+  <circle cx="32" cy="45" r="2" fill="#00ff9d" />
+</svg>
