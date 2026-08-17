@@ -4,6 +4,8 @@
 
 Vantage provides unified visibility and control over repositories, commit vitality, release tags, and CI/CD workflow runs across all your GitHub and GitLab spaces.
 
+![Vantage Dashboard Overview](docs/screenshots/dashboard.png)
+
 ---
 
 ## Key Capabilities
@@ -13,9 +15,23 @@ Vantage provides unified visibility and control over repositories, commit vitali
 - **Multi-Platform Support**: Connects to GitHub, public GitLab.com, and self-hosted GitLab instances with token authentication.
 - **Multi-Namespace Switching**: Switch between individual groups/orgs or monitor all configured spaces in a unified fleet view.
 - **Pipeline Orchestration**: Trigger any workflow on demand, retry failed runs, or cancel active executions directly from the UI or CLI.
+- **Step-Level Inspection**: Inspect individual pipeline jobs, progress checkmarks, step names, and durations.
 - **Dual Interfaces**:
   - **Embedded Web UI**: Cyber-Telemetry dashboard with live step inspector at `http://localhost:8080`.
   - **Terminal Commands**: Fast CLI commands (`vantage status`, `vantage runs`, `vantage spaces`, `vantage trigger`).
+
+---
+
+## Screenshots
+
+### Real-Time Pipelines Feed
+![Pipelines Telemetry](docs/screenshots/pipelines.png)
+
+### Step-by-Step Pipeline Inspector
+![Step Inspector](docs/screenshots/step_inspector.png)
+
+### Connect New Space (GitHub & GitLab)
+![Connect Space Modal](docs/screenshots/add_space.png)
 
 ---
 
